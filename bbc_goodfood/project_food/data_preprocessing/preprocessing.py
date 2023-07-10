@@ -112,7 +112,7 @@ if __name__ == "__main__":
     recipe_df = df.copy()
     print(recipe_df.shape)
     recipe_df.sort_values(DROP_DUPLICATES_BY_COLUMN, inplace=True)
-    recipe_df.drop_duplicates(subset=DROP_DUPLICATES_BY_COLUMN, keep=False, inplace=True)
+    recipe_df.drop_duplicates(subset=DROP_DUPLICATES_BY_COLUMN, keep='first', inplace=True)
     recipe_df.reset_index(drop=True, inplace=True)
     print(recipe_df)
 

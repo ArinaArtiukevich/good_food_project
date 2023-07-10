@@ -1,12 +1,13 @@
+import joblib
 import numpy as np
 import pandas as pd
-import scipy
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from constants import DATA_PARSED_CSV_PATH, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN
-from data_preprocessing.preprocessing import DataPreprocessing
 
+from constants import DATA_PARSED_CSV_PATH, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
+from data.schema.recipe import FittedTfIdfModel
+from data_preprocessing.preprocessing import DataPreprocessing
 
 class TF_IDF_RecipeRecommendation:
 
@@ -14,33 +15,27 @@ class TF_IDF_RecipeRecommendation:
                  df: pd.DataFrame,
                  column_name: str = INGREDIENTS_PARSED_COLUMN,
                  cv: CountVectorizer = CountVectorizer(ngram_range=(1, 1), lowercase=True),
-                 tfidf: TfidfTransformer = TfidfTransformer()):
+                 tfidf: TfidfTransformer = TfidfTransformer(),
+                 tfidf_matrix: np.ndarray = None
+                 ):
         self.df = df
         self.column_name = column_name
         self.cv = cv
         self.tfidf = tfidf
-        self.tfidf_matrix: scipy.sparse._csr.csr_matrix
+        self.tfidf_matrix = tfidf_matrix
 
     @classmethod
     def get_df_from_csv(cls, df_path: str = DATA_PARSED_CSV_PATH) -> pd.DataFrame:
         return pd.read_csv(df_path, sep='\t')
 
     @classmethod
-    def create_instance(cls, df_path: str = DATA_PARSED_CSV_PATH):
+    def create_instance(cls, df_path: str = DATA_PARSED_CSV_PATH) -> "TF_IDF_RecipeRecommendation":
         return cls(df=cls.get_df_from_csv(df_path))
 
     def prepare_model(self):
         self.cv.fit(self.df[self.column_name])
         cv_table = self.cv.transform(self.df[self.column_name])
         self.tfidf_matrix = self.tfidf.fit_transform(cv_table)
-
-        # todo
-        # joblib.dump(self.cv, CV_MODEL)
-        # self.tfidf.fit(cv_table)
-        # tfidf_ingredients = self.tfidf.fit_transform(cv_table)
-        # joblib.dump(self.tfidf, TF_IDF_RECIPE_RECOMMENDATION_MODEL)
-        # joblib.dump(self.tfidf_matrix, TF_IDF_INGREDIENT_RECIPE_RECOMMENDATION)
-
         return self
 
     def get_recommendations(self, user_input: str):
@@ -54,6 +49,21 @@ class TF_IDF_RecipeRecommendation:
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
             index=self.df[INGREDIENTS_COLUMN]).sort_values(ascending=False).head(5)
+
+    def to_pickle(self, path: str = TF_IDF_MODEL):
+        items = FittedTfIdfModel(
+            df=self.df,
+            cv=self.cv,
+            tfidf=self.tfidf,
+            tfidf_matrix=self.tfidf_matrix
+        )
+        joblib.dump(items, path)
+
+    @classmethod
+    def from_pickle(cls, path: str = TF_IDF_MODEL) -> "TF_IDF_RecipeRecommendation":
+        tf_idf_model = joblib.load(path)
+        return cls(tf_idf_model.df, tf_idf_model.cv, tf_idf_model.tf_idf,
+                   tf_idf_model.tfidf_matrix)
 
 
 if __name__ == "__main__":

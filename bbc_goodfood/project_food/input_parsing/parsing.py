@@ -29,16 +29,15 @@ class BBCRecipesParses(RecipeParser):
     def __init__(self, driver: webdriver = None):
         self.driver = driver if driver is not None else webdriver.Chrome(ChromeDriverManager().install())
 
-
     def parse_recipes(self, url: str = URL) -> pd.DataFrame:
         data = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS)
         pages = math.ceil(self.EXPECTED_NUMBER_OF_RECIPIES / 30)
-        for page in range(23, pages):
+        for page in range(66, pages):
             current_url = url + self.PAGE_PARAM + str(page)
             print(current_url)
             temp = self.generate_dataset(current_url)
             data = data.append(temp)
-        # todo del
+            # todo del
             data.to_csv(
                 DATA_CSV_PATH_FULL,
                 sep="\t", index=False)
@@ -69,7 +68,9 @@ class BBCRecipesParses(RecipeParser):
                     continue
             recipe_parser = bs4.BeautifulSoup(recipe_request.text, features="html.parser")
             try:
-                tags = json.loads(recipe_parser.find('script', attrs={'type': 'application/json', 'id': "__AD_SETTINGS__"}).contents[0])['targets']
+                tags = json.loads(
+                    recipe_parser.find('script', attrs={'type': 'application/json', 'id': "__AD_SETTINGS__"}).contents[
+                        0])['targets']
                 ingredients_space = recipe_parser.find('section', attrs={'class': 'recipe__ingredients'})
                 planner_space = recipe_parser.find('ul', attrs={'class': 'post-header__planning'})
                 health_banners_space = recipe_parser.find('ul', attrs={'class': 'post-header__term-icons-list'})
@@ -78,7 +79,9 @@ class BBCRecipesParses(RecipeParser):
                 planner_soup = planner_space.find('div', attrs={'class': 'post-header__skill-level'})
                 health_banners = self.get_health_banners(health_banners_space)
                 j = j + 1
-                result.loc[len(result)] = [tags['cuisine'] if 'cuisine' in tags else None, tags['meal-type'] if 'meal-type' in tags else None, recipe_title, ingredients, planner_soup.getText(), health_banners]
+                result.loc[len(result)] = [tags['cuisine'] if 'cuisine' in tags else None,
+                                           tags['meal-type'] if 'meal-type' in tags else None, recipe_title,
+                                           ingredients, planner_soup.getText(), health_banners]
 
             except:
                 # TODO
@@ -127,6 +130,6 @@ class BBCRecipesParses(RecipeParser):
 if __name__ == "__main__":
     parser = BBCRecipesParses()
     data = parser.parse_recipes()
-    data.to_csv(
-        DATA_CSV_PATH_FULL,
-        sep="\t", index=False)
+    # data.to_csv(
+    #     DATA_CSV_PATH_FULL,
+    #     sep="\t", index=False)

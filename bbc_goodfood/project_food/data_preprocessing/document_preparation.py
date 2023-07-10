@@ -12,7 +12,9 @@ if __name__ == "__main__":
                  '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/copy/join/326_333.csv',
                  # todo del 8073
                  '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/copy/join/1_1_22.csv',
-                 # todo del 8082
+                 # 8082
+                 '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/copy/join/1_23_65.csv',
+                 # 8173
                  ]
 
     combined_data = pd.DataFrame()

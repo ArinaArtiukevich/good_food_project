@@ -1,6 +1,5 @@
 import json
 import math
-import re
 import time
 
 import bs4
@@ -31,33 +30,21 @@ class BBCRecipesParses(RecipeParser):
         self.driver = driver if driver is not None else webdriver.Chrome(ChromeDriverManager().install())
 
 
-    def parse_recipes(self, url: str = URL):
+    def parse_recipes(self, url: str = URL) -> pd.DataFrame:
         data = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS)
         pages = math.ceil(self.EXPECTED_NUMBER_OF_RECIPIES / 30)
-        for page in range(292, pages):
+        for page in range(1, pages):
             current_url = url + self.PAGE_PARAM + str(page)
             print(current_url)
             temp = self.generate_dataset(current_url)
             data = data.append(temp)
-            data.to_csv(
-                DATA_CSV_PATH_FULL,
-                sep="\t", index=False)
+        # data.to_csv(
+        #     DATA_CSV_PATH_FULL,
+        #     sep="\t", index=False)
 
         self.driver.close()
         self.driver.quit()
-
-    # def parse_recipes(self):
-    #     data = pd.DataFrame(columns=['type', 'name', 'ingredients', 'difficulty', "health_banners"])
-    #
-    #     for i, row in self.categories.iterrows():
-    #         temp = self.generate_dataset(row["type"], row["url"], row["number"])
-    #         data = data.append(temp)
-    #         data.to_csv(
-    #             DATA_CSV_PATH_FULL,
-    #             sep="\t", index=False)
-    #
-    #     self.driver.close()
-    #     self.driver.quit()
+        return data
 
     def generate_dataset(self, url: str, basic_url: str = BASIC_URL) -> pd.DataFrame:
         result = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS)
@@ -138,4 +125,7 @@ class BBCRecipesParses(RecipeParser):
 
 if __name__ == "__main__":
     parser = BBCRecipesParses()
-    parser.parse_recipes()
+    data = parser.parse_recipes()
+    data.to_csv(
+        DATA_CSV_PATH_FULL,
+        sep="\t", index=False)

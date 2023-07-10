@@ -6,7 +6,7 @@ DATA_PARSED_CSV_PATH = r'/Users/arina/study/ds/project/food_recommendation/bbc_g
 TF_IDF_RECIPE_RECOMMENDATION_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/tf_idf_recipe_recommendation.pickle'
 TF_IDF_INGREDIENT_RECIPE_RECOMMENDATION = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/tf_idf_ingredients_recipe_recommendation.pickle'
 
-CV_MODEL  = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/cv_model.pickle'
+CV_MODEL = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/cv_model.pickle'
 
 WORD2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec.pickle'
 

@@ -1,13 +1,13 @@
 import ast
-
-import pandas as pd
 import re
-import nltk
-
-from nltk.stem import PorterStemmer, SnowballStemmer, WordNetLemmatizer
 # todo delete SnowballStemmer - более "сильный"
 from typing import List
-from constants import DATA_CSV_PATH_SHORT, DATA_PARSED_CSV_PATH, DATA_CSV_PATH_FULL, INGREDIENTS_COLUMN, \
+
+import nltk
+import pandas as pd
+from nltk.stem import SnowballStemmer, WordNetLemmatizer
+
+from constants import DATA_CSV_PATH_SHORT_CSV, DATA_PARSED_CSV_PATH_CSV, INGREDIENTS_COLUMN, \
     INGREDIENTS_PARSED_COLUMN, DROP_DUPLICATES_BY_COLUMN
 
 
@@ -29,7 +29,6 @@ class DataPreprocessing:
     def create_pattern(self, join_pattern: str, words: List[str]) -> str:
         return join_pattern.format('|'.join(words))
 
-    # TODO join prettify_string_ingredients and prettify_df_ingredients ???
     def prettify_string_ingredients(self, input_string: str) -> List[str]:
         modified_string = input_string
         # lower case
@@ -59,7 +58,8 @@ class DataPreprocessing:
         df_copy[INGREDIENTS_PARSED_COLUMN] = df_copy[INGREDIENTS_COLUMN].str.lower()
 
         # remove numbers + "("..")" + u2028
-        df_copy[INGREDIENTS_PARSED_COLUMN] = df_copy[INGREDIENTS_PARSED_COLUMN].str.replace(self.PATTERN_REMOVE_DIGITS_BRACKETS, "", regex=True)
+        df_copy[INGREDIENTS_PARSED_COLUMN] = df_copy[INGREDIENTS_PARSED_COLUMN].str.replace(
+            self.PATTERN_REMOVE_DIGITS_BRACKETS, "", regex=True)
 
         # measures
         pattern = self.create_pattern(self.PATTERN_JOIN_WORDS, self.MEASURES)
@@ -104,11 +104,13 @@ class DataPreprocessing:
     def preprocess_df(self, df_recipes: pd.DataFrame) -> pd.DataFrame:
         result_df = df_recipes.copy()
         result_df = self.prettify_df_ingredients(result_df)
-        result_df[INGREDIENTS_PARSED_COLUMN] = result_df[INGREDIENTS_PARSED_COLUMN].apply(lambda x: self.preprocess_list_ingredients(x))
+        result_df[INGREDIENTS_PARSED_COLUMN] = result_df[INGREDIENTS_PARSED_COLUMN].apply(
+            lambda x: self.preprocess_list_ingredients(x))
         return result_df
 
+
 if __name__ == "__main__":
-    df = pd.read_csv(DATA_CSV_PATH_SHORT, sep='\t')
+    df = pd.read_csv(DATA_CSV_PATH_SHORT_CSV, sep='\t')
     recipe_df = df.copy()
     print(recipe_df.shape)
     recipe_df.sort_values(DROP_DUPLICATES_BY_COLUMN, inplace=True)
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     # save preprocessed df
     dt_preprocess = DataPreprocessing()
     dt_preprocessed = dt_preprocess.preprocess_df(recipe_df)
-    dt_preprocessed.to_csv(DATA_PARSED_CSV_PATH, sep="\t", index=False)
+    dt_preprocessed.to_csv(DATA_PARSED_CSV_PATH_CSV, sep="\t", index=False)
 
     test_string = "[' 22(del)5g unsalted          butter,  (delete) softened', '225g caster sugar', '4 eggs', " \
                   "'225g self,-raising flour', '1        lemon, zested', '1½ lemons, juiced', '85g caster sugar',' salt']"

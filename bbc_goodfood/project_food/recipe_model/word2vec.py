@@ -4,11 +4,11 @@ import joblib
 import pandas as pd
 from gensim.models.word2vec import Word2Vec
 
-from constants import DATA_PARSED_CSV_PATH, WORD2VEC_MODEL
+from constants import DATA_PARSED_CSV_PATH_CSV, WORD2VEC_MODEL
 
 
 class CustomWord2Vec:
-    def __init__(self, df_path: str = DATA_PARSED_CSV_PATH):
+    def __init__(self, df_path: str = DATA_PARSED_CSV_PATH_CSV):
         self.df_path = df_path
         self.df = pd.read_csv(df_path, sep='\t')
         self.set_model()

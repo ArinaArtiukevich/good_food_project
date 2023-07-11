@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-from constants import DATA_PARSED_CSV_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
+from constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
 from data.schema.recommendation_models import FittedTfIdfModel
 from data_preprocessing.preprocessing import DataPreprocessing
 
@@ -25,11 +25,11 @@ class TF_IDF_RecipeRecommendation:
         self.tfidf_matrix = tfidf_matrix
 
     @classmethod
-    def get_df_from_csv(cls, df_path: str = DATA_PARSED_CSV_PATH_CSV) -> pd.DataFrame:
+    def get_df_from_csv(cls, df_path: str = DATA_PARSED_PATH_CSV) -> pd.DataFrame:
         return pd.read_csv(df_path, sep='\t')
 
     @classmethod
-    def create_instance(cls, df_path: str = DATA_PARSED_CSV_PATH_CSV) -> "TF_IDF_RecipeRecommendation":
+    def create_instance(cls, df_path: str = DATA_PARSED_PATH_CSV) -> "TF_IDF_RecipeRecommendation":
         return cls(df=cls.get_df_from_csv(df_path))
 
     def prepare_model(self):
@@ -67,6 +67,6 @@ class TF_IDF_RecipeRecommendation:
 
 
 if __name__ == "__main__":
-    tf_idf = TF_IDF_RecipeRecommendation.create_instance(df_path=DATA_PARSED_CSV_PATH_CSV).prepare_model()
+    tf_idf = TF_IDF_RecipeRecommendation.create_instance(df_path=DATA_PARSED_PATH_CSV).prepare_model()
     rec = tf_idf.get_recommendations("['cinnamon', 'sugar', 'apple', 'flour']")
     print(rec)

@@ -3,12 +3,14 @@ import re
 # todo delete SnowballStemmer - более "сильный"
 from typing import List
 
+import joblib
 import nltk
 import pandas as pd
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 
-from constants import DATA_CSV_PATH_SHORT_CSV, DATA_PARSED_CSV_PATH_CSV, INGREDIENTS_COLUMN, \
-    INGREDIENTS_PARSED_COLUMN, DROP_DUPLICATES_BY_COLUMN
+from constants import DATA_PATH_SHORT_CSV, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
+    INGREDIENTS_PARSED_COLUMN, DROP_DUPLICATES_BY_COLUMN, DATA_PARSED_PATH_PICKLE
+from data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
 
 
 class DataPreprocessing:
@@ -87,7 +89,7 @@ class DataPreprocessing:
         ingredient = " ".join(ingredient.split())
         return ingredient
 
-    def preprocess_list_ingredients(self, list_ingredients: List) -> List:
+    def preprocess_list_ingredients(self, list_ingredients: List) -> List[str]:
         result = []
         for ingredients in list_ingredients:
             words = re.split(self.PATTERN_SPLIT_WORDS, ingredients)
@@ -97,7 +99,7 @@ class DataPreprocessing:
                 result.append(' '.join(words))
         return result
 
-    def preprocess_request(self, req: str) -> List:
+    def preprocess_request(self, req: str) -> List[str]:
         ingredients_list = self.prettify_string_ingredients(req)
         return self.preprocess_list_ingredients(ingredients_list)
 
@@ -108,20 +110,48 @@ class DataPreprocessing:
             lambda x: self.preprocess_list_ingredients(x))
         return result_df
 
+    def preprocess_list(self, recipes: List[ExtendedRecipeModel]) -> List[RecipeParsedModel]:
+        recipes_list = recipes.copy()
+        parsed_recipes_list = []
+        for recipe in recipes_list:
+            ingredients_parsed = self.preprocess_list_ingredients(self.prettify_string_ingredients(recipe.ingredients))
+            parsed_recipes_list.append(
+                RecipeParsedModel(
+                    cuisine=recipe.cuisine,
+                    types=recipe.types,
+                    name=recipe.name,
+                    ingredients=recipe.ingredients,
+                    difficulty=recipe.difficulty,
+                    health_banners=recipe.health_banners,
+                    ingredients_parsed=ingredients_parsed
+                )
+            )
+        return parsed_recipes_list
+
 
 if __name__ == "__main__":
-    df = pd.read_csv(DATA_CSV_PATH_SHORT_CSV, sep='\t')
+    # # CSV
+    df = pd.read_csv(DATA_PATH_SHORT_CSV, sep='\t')
     recipe_df = df.copy()
     print(recipe_df.shape)
-    recipe_df.sort_values(DROP_DUPLICATES_BY_COLUMN, inplace=True)
+    # recipe_df.sort_values(DROP_DUPLICATES_BY_COLUMN, inplace=True)
     recipe_df.drop_duplicates(subset=DROP_DUPLICATES_BY_COLUMN, keep='first', inplace=True)
     recipe_df.reset_index(drop=True, inplace=True)
     print(recipe_df)
-
     # save preprocessed df
     dt_preprocess = DataPreprocessing()
     dt_preprocessed = dt_preprocess.preprocess_df(recipe_df)
-    dt_preprocessed.to_csv(DATA_PARSED_CSV_PATH_CSV, sep="\t", index=False)
+    dt_preprocessed.to_csv(DATA_PARSED_PATH_CSV, sep="\t", index=False)
+
+    # PICKLE
+    df = pd.read_csv(DATA_PATH_SHORT_CSV, sep='\t')
+    recipe_df = df.copy()
+    recipes_list = list(recipe_df.itertuples(name='ExtendedRecipeModel', index=False))
+    unique_recipes_list = list(set(recipes_list))
+    preprocessed_list = dt_preprocess.preprocess_list(unique_recipes_list)
+    joblib.dump(preprocessed_list, DATA_PARSED_PATH_PICKLE)
+    joblib.load(DATA_PARSED_PATH_PICKLE)
+
 
     test_string = "[' 22(del)5g unsalted          butter,  (delete) softened', '225g caster sugar', '4 eggs', " \
                   "'225g self,-raising flour', '1        lemon, zested', '1½ lemons, juiced', '85g caster sugar',' salt']"

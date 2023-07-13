@@ -15,3 +15,4 @@ INGREDIENTS_COLUMN = "ingredients"
 INGREDIENTS_PARSED_COLUMN = "ingredients_parsed"
 DATAFRAME_INIT_COLUMNS = ['cuisine', 'types', 'name', 'ingredients', 'difficulty', "health_banners"]
 DROP_DUPLICATES_BY_COLUMN = INGREDIENTS_COLUMN
+LIST_PARAMS_PARSED_MODEL =['cuisine', 'types', 'health_banners', 'ingredients_parsed']

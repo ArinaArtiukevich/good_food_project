@@ -16,11 +16,33 @@ from data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
 class DataPreprocessing:
     MEASURES = ['cup', 'tsp', 'tbsp', 'c', 'fl oz', 'pt', 'qt', 'gal', 'g', 'kg', 'mg', 'oz', 'lb', 'slice', 'piece',
                 'pinch', 'dash', 'whole', 'dozen', 'count', 'pkg', 'can', 'jar', 'carton', 'stick', 'drop', 'cm', 'm',
-                'ml', 'l', 'x', 'pint', 'cubes', 'cube', 'pack']
+                'ml', 'l', 'x', 'pint', 'cubes', 'cube', 'pack', '%', 'packet', 'pack', 'can', 'pod', 'slice', 'sliced', 'tubs', 'tub']
     # STOP_WORDS = ['a', 'an', 'the', 'in', 'on', 'at', 'for', 'of', 'with', 'to', 'from', 'by', 'as', 'is', 'are',
     # 'was', 'were', 'has', 'have', 'had', 'need']
-    STOP_WORDS = set(nltk.corpus.stopwords.words('english') + ['new', "%"])
-    PATTERN_REMOVE_DIGITS_BRACKETS = r'(\d|\½|¼)(\-?\.?)\s?|\((.*?)\)|\\u|\\|\/'
+    STOP_WORDS = set(nltk.corpus.stopwords.words('english') + ['new', 'per'])
+    PREPROCESSED_STOP_WORDS = [
+        'grey', 'white', 'one',
+        'two', 'three', 'four', 'five',
+        'middl', 'around', 'hot', 'high',
+        'big', 'irregular', 'regular',
+        'kept', 'etc', 'king', 'light', 'luxuri', 'luxury',
+        'made', 'make', 'day', 'metal',
+        'room', 'nice', 'mix', 'flat', 'possibl',
+        'visibl', 'prefer', 'buy', 'rich', 'save', 'serve',
+        'want', 'wash', 'whatev', 'winter', 'work', 'write', 'young'
+        'larg', 'hand', 'fine', 'chop', 'serv', 'lengthway',
+    ]
+    ingredient_replacements = {
+        'crème': 'creme', 'chilli': 'chili',
+        'fraîch': 'fraich', 'halv': 'half',
+        'harissa': 'harrisa', 'jalapeño': 'jalapen',
+        'lenthway': 'lengthway', 'muscavdo': 'muscovado',
+        'oilv': 'oliv', 'puré': 'pure', 'smoki': 'smoke',
+        'softenend': 'soft', 'soften': 'soft',
+        'starter': 'start', 'tasti': 'tast',  'turkey': 'turkish',
+        'yoghurt': 'yogurt'
+    }
+    PATTERN_REMOVE_DIGITS_BRACKETS = r'((\d|½|¼|⅔|⅓|¾)\w?\%?\s*)(\-?\.?)\s*|\((.*?)\)|\\u|\\|\/'
     PATTERN_JOIN_WORDS = r'\b(?:{})\s?\b'
     PATTERN_SPLIT_WORDS = r'\W+|\s+'
 
@@ -84,6 +106,7 @@ class DataPreprocessing:
 
         return df_copy
 
+
     def preprocess_ingredient(self, ingredient: str) -> str:
         ingredient = ingredient.replace(",", "")
         ingredient = " ".join(ingredient.split())
@@ -95,8 +118,10 @@ class DataPreprocessing:
             words = re.split(self.PATTERN_SPLIT_WORDS, ingredients)
             words = [self.lemmatizer.lemmatize(word) for word in words]
             words = [self.stemmer.stem(word) for word in words]
+            words = [word for word in words if word not in self.PREPROCESSED_STOP_WORDS]
+            words = [self.ingredient_replacements[word] if word in self.ingredient_replacements else word for word in words]
             if words:
-                result.append(' '.join(words))
+                result.append(' '.join(filter(None, words)))
         return result
 
     def preprocess_request(self, req: str) -> List[str]:
@@ -152,8 +177,7 @@ if __name__ == "__main__":
     joblib.dump(preprocessed_list, DATA_PARSED_PATH_PICKLE)
     joblib.load(DATA_PARSED_PATH_PICKLE)
 
-
-    test_string = "[' 22(del)5g unsalted          butter,  (delete) softened', '225g caster sugar', '4 eggs', " \
-                  "'225g self,-raising flour', '1        lemon, zested', '1½ lemons, juiced', '85g caster sugar',' salt']"
+    test_string = "[' 22(del)5g unsalted          butter,  (delete) softened', '225g caster sugar', '4 middle  eggs', " \
+                  "'225g self,-raising flour', '1        lemon, zested', '1½ crème   lemons, juiced', '85g caster sugar',' salt', '2 carrots, finely chopped']"
     list_test_ingredients = dt_preprocess.preprocess_request(test_string)
     print(list_test_ingredients)

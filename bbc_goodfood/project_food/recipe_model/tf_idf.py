@@ -6,15 +6,14 @@ import pandas as pd
 from Levenshtein import distance
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import MultiLabelBinarizer
 
-from constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL, \
-    DATA_PARSED_PATH_PICKLE, LIST_PARAMS_PARSED_MODEL
+from constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
 from data.schema.recommendation_models import FittedTfIdfModel
 from data_preprocessing.preprocessing import DataPreprocessing
+from recipe_model.basic_model import BasicModel
 
 
-class TF_IDF_RecipeRecommendation:
+class TF_IDF_RecipeRecommendation(BasicModel):
 
     def __init__(self,
                  df: pd.DataFrame,
@@ -28,17 +27,6 @@ class TF_IDF_RecipeRecommendation:
         self.cv = cv
         self.tfidf = tfidf
         self.tfidf_matrix = tfidf_matrix
-
-    @classmethod
-    def get_df_from_csv(cls, df_path: str = DATA_PARSED_PATH_CSV) -> pd.DataFrame:
-        return pd.read_csv(df_path, sep='\t')
-
-    @classmethod
-    def get_df_from_pickle(cls, list_path: str = DATA_PARSED_PATH_PICKLE) -> pd.DataFrame:
-        result_df = pd.DataFrame(joblib.load(list_path))
-        result_df[LIST_PARAMS_PARSED_MODEL] = result_df[LIST_PARAMS_PARSED_MODEL].apply(
-            lambda x: [str(sentence) for sentence in x])
-        return result_df
 
     @classmethod
     def create_instance(cls, from_csv: bool = True, path: str = DATA_PARSED_PATH_CSV) -> "TF_IDF_RecipeRecommendation":

@@ -16,7 +16,7 @@ from data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
 class DataPreprocessing:
     MEASURES = ['cup', 'tsp', 'tbsp', 'c', 'fl oz', 'pt', 'qt', 'gal', 'g', 'kg', 'mg', 'oz', 'lb', 'slice', 'piece',
                 'pinch', 'dash', 'whole', 'dozen', 'count', 'pkg', 'can', 'jar', 'carton', 'stick', 'drop', 'cm', 'm',
-                'ml', 'l', 'x', 'pint', 'cubes', 'cube', 'pack', '%', 'packet', 'pack', 'can', 'pod', 'slice', 'sliced', 'tubs', 'tub']
+                'ml', 'l', 'x', 'pint', 'cubes', 'cube', 'pack', '%', 'packet', 'pack', 'can', 'pod', 'slice', 'sliced', 'tubs', 'tub', 'tin', 'tins']
     # STOP_WORDS = ['a', 'an', 'the', 'in', 'on', 'at', 'for', 'of', 'with', 'to', 'from', 'by', 'as', 'is', 'are',
     # 'was', 'were', 'has', 'have', 'had', 'need']
     STOP_WORDS = set(nltk.corpus.stopwords.words('english') + ['new', 'per'])
@@ -30,7 +30,9 @@ class DataPreprocessing:
         'room', 'nice', 'mix', 'flat', 'possibl',
         'visibl', 'prefer', 'buy', 'rich', 'save', 'serve',
         'want', 'wash', 'whatev', 'winter', 'work', 'write', 'young'
-        'larg', 'hand', 'fine', 'chop', 'serv', 'lengthway',
+        'larg', 'hand', 'fine', 'chop', 'serv', 'lengthway', 'larg', 'thick',
+        'rough', 'piec', 'peel', 'cube', 'thigh', 'bite', 'size', 'plus', 'extra',
+        'greas', 'natur', 'crush', 'leaf', 'left', 'temperatur', 'skin'
     ]
     ingredient_replacements = {
         'crème': 'creme', 'chilli': 'chili',

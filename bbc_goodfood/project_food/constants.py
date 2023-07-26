@@ -8,7 +8,6 @@ DATA_PARSED_PATH_PICKLE = r'/Users/arina/study/ds/project/food_recommendation/bb
 
 TF_IDF_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/tf_idf_model.pickle'
 CV_MODEL = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/cv_model.pickle'
-
 WORD2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec.pickle'
 
 INGREDIENTS_COLUMN = "ingredients"

@@ -10,6 +10,7 @@ import requests
 
 from abc import ABC, abstractmethod
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
@@ -30,7 +31,7 @@ class BBCRecipesParses(RecipeParser):
     PAGE_PARAM = "&page="
 
     def __init__(self, driver: webdriver = None):
-        self.driver = driver if driver is not None else webdriver.Chrome(ChromeDriverManager().install())
+        self.driver = driver if driver is not None else webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()))
 
     def parse_recipes(self, url: str = URL, return_dataframe: bool = True) -> List[ExtendedRecipeModel] | pd.DataFrame:
         input_recipes = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []

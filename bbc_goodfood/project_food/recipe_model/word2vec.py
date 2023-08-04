@@ -158,7 +158,6 @@ class TfIdfWord2Vec(CustomWord2Vec):
             mean = np.array(mean).mean(axis=0)
             return mean
 
-
     def get_recommendations(self, user_input: str) -> pd.Series:
         doc_model = self.fit().transform(self.val)
         doc_model = [doc.reshape(1, -1) for doc in doc_model]
@@ -171,7 +170,7 @@ class TfIdfWord2Vec(CustomWord2Vec):
 
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(transformed_input, x), doc_model)))).ravel(),
-            index=self.df[INGREDIENTS_COLUMN]).sort_values(ascending=False).head(5)
+            index=self.df["name"]).sort_values(ascending=False).head(5)
 
 
 if __name__ == "__main__":
@@ -188,7 +187,6 @@ if __name__ == "__main__":
     # user_inp = "['cinnamon', 'sugar', 'apple', 'flour', 'butter']"
     # rec = model.get_recommendations(user_inp)
     # print(rec)
-
 
     tfidf_word_to_vec = TfIdfWord2Vec.create_instance().train_model()
     user_inp = "['cinnamon', 'sugar', 'apple', 'flour', 'butter']"

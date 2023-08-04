@@ -27,8 +27,8 @@ W2V_MEAN_RECOMMENDATION_OPTION = "w2v_mean"
 W2V_TF_IDF_RECOMMENDATION_OPTION = "w2v_tf_idf"
 
 
-# TODO secure data
-BOT_TOKEN = '6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0'
-BOT_USERNAME = '@recipe_recommender_bot'
-FAST_API_URL = f'http://localhost:8000'
+# todo del secure data
+# BOT_TOKEN = '6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0'
+# BOT_USERNAME = '@recipe_recommender_bot'
+# FAST_API_URL = f'http://localhost:8000'
 

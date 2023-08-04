@@ -1,24 +1,27 @@
 import json
-from io import BytesIO
 
 import pandas as pd
 import requests
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
 
-from constants import BOT_TOKEN, FAST_API_URL, TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
+from configs.dev import FAST_API_URL, BOT_TOKEN
+from constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET
 
 RECIPE_RECOMMENDER = 0
 keyboard = [[TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET]]
 
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello there! What ingredients do you have?')
 
 
 async def parse_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    request = FAST_API_URL + '/parse/csv'
+    request = FAST_API_URL + 'data/parse/csv'
+    requests.get(request)
+    request = FAST_API_URL + 'data/preprocess/csv'
     response = requests.get(request)
     json_response = json.loads(response.text)
     df = pd.DataFrame(json_response)

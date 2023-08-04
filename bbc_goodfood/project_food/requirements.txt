@@ -1,6 +1,5 @@
 beautifulsoup4==4.12.2
 pandas==1.5.3
-python-telegram-bot==20.4
 requests==2.29.0
 scikit-learn==1.2.2
 selenium==4.10.0
@@ -10,4 +9,4 @@ numpy==1.24.3
 gensim==4.3.0
 fastapi==0.100.1
 levenshtein==0.21.1
-uvicorn==0.23.1
+python-dotenv==1.0.0

@@ -9,11 +9,11 @@ from gensim.models.word2vec import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL, \
+from project_food.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL, \
     INGREDIENTS_PARSED_COLUMN
-from data.schema.recommendation_models import NamedWord2Vec
-from data_preprocessing.preprocessing import DataPreprocessing
-from recipe_model.basic_model import BasicModel
+from project_food.data.schema.recommendation_models import NamedWord2Vec
+from project_food.data_preprocessing.preprocessing import DataPreprocessing
+from project_food.recipe_model.basic_model import BasicModel
 
 
 class CustomWord2Vec(BasicModel):

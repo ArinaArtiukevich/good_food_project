@@ -1,6 +1,6 @@
 import pandas as pd
 
-from constants import DROP_DUPLICATES_BY_COLUMN
+from project_food.constants import DROP_DUPLICATES_BY_COLUMN
 
 if __name__ == "__main__":
     csv_files = ['/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/copy/join/1_54.csv',

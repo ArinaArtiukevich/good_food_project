@@ -5,12 +5,13 @@ import pandas as pd
 import uvicorn
 from fastapi import FastAPI, Response, Query, status
 
-from constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
-    DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL, TF_IDF_MODEL
-from data_preprocessing.preprocessing import DataPreprocessing
-from input_parsing.parsing import BBCRecipesParses
-from recipe_model.tf_idf import TF_IDF_RecipeRecommendation
-from recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
+from project_food.data_preprocessing.preprocessing import DataPreprocessing
+from project_food.input_parsing.parsing import BBCRecipesParses
+from project_food.recipe_model.tf_idf import TF_IDF_RecipeRecommendation
+from project_food.recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
+
+from project_food.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
+     DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL, TF_IDF_MODEL
 
 app = FastAPI()
 

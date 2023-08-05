@@ -8,9 +8,9 @@ import nltk
 import pandas as pd
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 
-from constants import DATA_PATH_SHORT_CSV, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
+from project_food.constants import DATA_PATH_SHORT_CSV, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
     INGREDIENTS_PARSED_COLUMN, DROP_DUPLICATES_BY_COLUMN, DATA_PARSED_PATH_PICKLE
-from data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
+from project_food.data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
 
 
 class DataPreprocessing:

@@ -6,7 +6,7 @@ from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
 
 from configs.dev import FAST_API_URL, BOT_TOKEN
-from constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
+from project_food.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET
 

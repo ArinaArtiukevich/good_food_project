@@ -13,8 +13,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
-from data.schema.recipe import ExtendedRecipeModel
+from project_food.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
+from project_food.data.schema.recipe import ExtendedRecipeModel
 
 
 class RecipeParser(ABC):

@@ -51,6 +51,7 @@ class TF_IDF_RecipeRecommendation(BasicModel):
 
     def get_recommendations(self, user_input: str):
         preprocessed_input = pd.Series([(DataPreprocessing().preprocess_request(user_input))]).astype(str)
+        print(self.cv)
         input_cv = self.cv.transform(preprocessed_input)
         input_tfidf = self.tfidf.transform(input_cv)
         # todo
@@ -73,8 +74,8 @@ class TF_IDF_RecipeRecommendation(BasicModel):
     @classmethod
     def from_pickle(cls, path: str = TF_IDF_MODEL) -> "TF_IDF_RecipeRecommendation":
         tf_idf_model = joblib.load(path)
-        return cls(tf_idf_model.df, tf_idf_model.cv, tf_idf_model.tfidf,
-                   tf_idf_model.tfidf_matrix)
+        return cls(df=tf_idf_model.df, cv=tf_idf_model.cv, tfidf=tf_idf_model.tfidf,
+                   tfidf_matrix=tf_idf_model.tfidf_matrix)
 
 
 if __name__ == "__main__":

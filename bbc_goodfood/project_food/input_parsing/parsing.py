@@ -42,6 +42,7 @@ class BBCRecipesParses(RecipeParser):
             temp = self.generate_dataset(url=current_url, return_dataframe=return_dataframe)
             input_recipes = input_recipes.append(temp) if return_dataframe else input_recipes + temp
             # todo del
+            joblib.dump(input_recipes, DATA_PATH_FULL_PICKLE)
             df = pd.DataFrame(input_recipes)
             df.to_csv(
                 DATA_PATH_FULL_CSV,
@@ -104,7 +105,7 @@ class BBCRecipesParses(RecipeParser):
             cuisine=tags['cuisine'] if 'cuisine' in tags else None,
             types=tags['meal-type'] if 'meal-type' in tags else None,
             name=recipe_title,
-            ingredients=ingredients,
+            ingredients=str(ingredients),
             difficulty=planner_soup.getText(),
             health_banners=health_banners
         )

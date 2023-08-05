@@ -2,7 +2,8 @@ from typing import List
 
 import joblib
 import pandas as pd
-from fastapi import FastAPI, Response, Query
+import uvicorn
+from fastapi import FastAPI, Response, Query, status
 
 from constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
     DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL, TF_IDF_MODEL
@@ -14,7 +15,7 @@ from recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
 app = FastAPI()
 
 
-@app.get("data/parse/pickle")
+@app.get("/data/parse/pickle")
 async def parse_recipe_pickle(path: str = DATA_PATH_FULL_PICKLE):
     parser = BBCRecipesParses()
     data = parser.parse_recipes(return_dataframe=False)
@@ -22,7 +23,7 @@ async def parse_recipe_pickle(path: str = DATA_PATH_FULL_PICKLE):
     return Response((pd.DataFrame(data)).to_json(orient="records"), media_type="application/json")
 
 
-@app.get("data/parse/csv")
+@app.get("/data/parse/csv")
 async def parse_recipe_csv(path: str = DATA_PATH_FULL_CSV):
     parser = BBCRecipesParses()
     data = parser.parse_recipes(return_dataframe=True)
@@ -33,19 +34,19 @@ async def parse_recipe_csv(path: str = DATA_PATH_FULL_CSV):
     return Response(df.to_json(orient="records"), media_type="application/json")
 
 
-@app.get("data/preprocess/pickle")
+@app.get("/data/preprocess/pickle")
 async def parse_recipe_pickle(load_path: str = DATA_PATH_FULL_PICKLE, save_path: str = DATA_PARSED_PATH_PICKLE):
     recipes_list = joblib.load(load_path)
-    # todo print data
     dt_preprocess = DataPreprocessing()
     unique_recipes_list = list(set(recipes_list))
+    print(unique_recipes_list)
     preprocessed_list = dt_preprocess.preprocess_list(unique_recipes_list)
     joblib.dump(preprocessed_list, save_path)
 
     return Response((pd.DataFrame(preprocessed_list)).to_json(orient="records"), media_type="application/json")
 
 
-@app.get("data/preprocess/csv")
+@app.get("/data/preprocess/csv")
 async def parse_recipe_csv(load_path: str = DATA_PATH_FULL_CSV, save_path: str = DATA_PARSED_PATH_CSV):
     recipe_df = pd.read_csv(load_path, sep='\t')
     recipe_df.drop_duplicates(subset=DROP_DUPLICATES_BY_COLUMN, keep='first', inplace=True)
@@ -63,10 +64,11 @@ async def get_recipe_tf_idf(save_path: str = TF_IDF_MODEL, user_input: List[str]
     return Response(response.to_json(), media_type="application/json")
 
 
-@app.get("/recipe/tarin/tf_idf")
+@app.get("/recipe/train/tf_idf")
 async def train_recipe_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = TF_IDF_MODEL):
     model = TF_IDF_RecipeRecommendation.create_instance(from_csv=True, path=data_path).prepare_model()
     model.to_pickle(path=save_path)
+    return status.HTTP_201_CREATED
 
 
 @app.get("/recipe/w2v_mean")
@@ -80,6 +82,7 @@ async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL, user_input: List[str] 
 async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
     model = MeanWord2Vec.create_instance(path=data_path).train_model()
     model.to_pickle(path=save_path)
+    return status.HTTP_201_CREATED
 
 
 @app.get("/recipe/w2v_tf_idf")
@@ -93,3 +96,8 @@ async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL, user_input: List[str
 async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
     model = TfIdfWord2Vec.create_instance(path=data_path).train_model()
     model.to_pickle(path=save_path)
+    return status.HTTP_201_CREATED
+
+
+if __name__ == "__main__":
+    uvicorn.run("fast_api:app", host="127.0.0.1", port=8000, log_level="info")

@@ -5,7 +5,7 @@ import requests
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
 
-from configs.dev import FAST_API_URL, BOT_TOKEN
+from configs.dev import BOT_TOKEN, FAST_API_TELEGRAM_URL, FAST_API_RECOMMENDER_URL
 from project_food.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET
@@ -18,14 +18,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello there! What ingredients do you have?')
 
 
-async def parse_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    request = FAST_API_URL + 'data/parse/csv'
-    requests.get(request)
-    request = FAST_API_URL + 'data/preprocess/csv'
-    response = requests.get(request)
-    json_response = json.loads(response.text)
-    df = pd.DataFrame(json_response)
-    await update.message.reply_text('Recipes were successfully parsed.')
+async def parse_preprocess_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    request = FAST_API_TELEGRAM_URL + "/parse"
+    df = pd.DataFrame(requests.get(request))
+    request = FAST_API_TELEGRAM_URL + '/preprocess'
+    df = pd.DataFrame(requests.get(request))
+    await update.message.reply_text('Recipes were successfully parsed and preprocessed.')
 
 
 async def recipe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -77,7 +75,7 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
         "The request is in process. Please, wait.",
         reply_markup=ReplyKeyboardRemove()
     )
-    request = FAST_API_URL + '/recipe/'
+    request = FAST_API_TELEGRAM_URL + "/"
     if context.user_data[DEFAULT_RECOMMENDATION_OPTION] or context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION]:
         request = request + W2V_TF_IDF_RECOMMENDATION_OPTION
     elif context.user_data[TF_IDF_RECOMMENDATION_OPTION]:
@@ -99,13 +97,10 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-    print(result_list)
-    print(type(result_list))
     params = {
         'user_input': result_list
     }
     response = requests.get(request, params)
-    print(response)
     json_response = json.loads(response.text)
     await update.message.reply_text(
         json_response
@@ -157,7 +152,7 @@ if __name__ == '__main__':
 
     # Commands
     app.add_handler(CommandHandler('start', start_command))
-    app.add_handler(CommandHandler('parse', parse_command))
+    app.add_handler(CommandHandler('parse', parse_preprocess_command))
 
     conv_handler = ConversationHandler(
         entry_points=[

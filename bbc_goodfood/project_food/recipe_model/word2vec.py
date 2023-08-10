@@ -8,12 +8,14 @@ from typing import List, Dict
 from gensim.models.word2vec import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import sys
 
-from project_food.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL, \
-    INGREDIENTS_PARSED_COLUMN
-from project_food.data.schema.recommendation_models import NamedWord2Vec
-from project_food.data_preprocessing.preprocessing import DataPreprocessing
-from project_food.recipe_model.basic_model import BasicModel
+sys.path.append("..")
+from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL, \
+    INGREDIENTS_PARSED_COLUMN, NAME_COLUMN
+from data.schema.recommendation_models import NamedWord2Vec
+from data_preprocessing.preprocessing import DataPreprocessing
+from recipe_model.basic_model import BasicModel
 
 
 class CustomWord2Vec(BasicModel):
@@ -170,7 +172,7 @@ class TfIdfWord2Vec(CustomWord2Vec):
 
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(transformed_input, x), doc_model)))).ravel(),
-            index=self.df["name"]).sort_values(ascending=False).head(5)
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)
 
 
 if __name__ == "__main__":

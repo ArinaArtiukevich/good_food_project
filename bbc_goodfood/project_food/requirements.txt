@@ -10,3 +10,7 @@ gensim==4.3.0
 fastapi==0.100.1
 levenshtein==0.21.1
 python-dotenv==1.0.0
+uvicorn==0.23.1
+fastapi==0.100.1
+nltk==3.7
+webdriver-manager==3.8.6

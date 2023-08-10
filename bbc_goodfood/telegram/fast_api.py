@@ -1,16 +1,13 @@
 import json
-import os
-import sys
+
 import uvicorn
 import requests
 
-from fastapi import FastAPI, Query, Response
+from fastapi import FastAPI, Query
 from typing import List
 
-from project_food.constants import TF_IDF_MODEL, TF_IDF_RECOMMENDATION_OPTION, DATA_PARSED_PATH_CSV, WORD2VEC_MODEL, \
+from configs.constants import TF_IDF_MODEL, TF_IDF_RECOMMENDATION_OPTION, DATA_PARSED_PATH_CSV, WORD2VEC_MODEL, \
     W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 import configs.dev as dev
 
 app = FastAPI()
@@ -98,4 +95,4 @@ async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_pa
 
 
 if __name__ == "__main__":
-    uvicorn.run("fast_api:app", host="127.0.0.1", port=4000, log_level="info")
+    uvicorn.run("fast_api:app", host="0.0.0.0", port=4000, log_level="info")

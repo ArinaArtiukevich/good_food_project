@@ -1,7 +1,8 @@
 import joblib
 import pandas as pd
-
-from project_food.constants import DATA_PARSED_PATH_CSV, DATA_PARSED_PATH_PICKLE, LIST_PARAMS_PARSED_MODEL
+import sys
+sys.path.append("..")
+from configs.constants import DATA_PARSED_PATH_CSV, DATA_PARSED_PATH_PICKLE, LIST_PARAMS_PARSED_MODEL
 
 
 class BasicModel:

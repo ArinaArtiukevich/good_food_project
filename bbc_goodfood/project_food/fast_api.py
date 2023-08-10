@@ -3,14 +3,15 @@ from typing import List
 import joblib
 import pandas as pd
 import uvicorn
+import sys
+sys.path.append("..")
 from fastapi import FastAPI, Response, Query, status
+from data_preprocessing.preprocessing import DataPreprocessing
+from input_parsing.parsing import BBCRecipesParses
+from recipe_model.tf_idf import TF_IDF_RecipeRecommendation
+from recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
 
-from project_food.data_preprocessing.preprocessing import DataPreprocessing
-from project_food.input_parsing.parsing import BBCRecipesParses
-from project_food.recipe_model.tf_idf import TF_IDF_RecipeRecommendation
-from project_food.recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
-
-from project_food.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
+from configs.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
      DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL, TF_IDF_MODEL
 
 app = FastAPI()
@@ -101,4 +102,4 @@ async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_pa
 
 
 if __name__ == "__main__":
-    uvicorn.run("fast_api:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("fast_api:app", host="0.0.0.0", port=8000, log_level="info")

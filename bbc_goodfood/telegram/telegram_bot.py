@@ -1,12 +1,16 @@
+import ast
 import json
+from typing import Tuple, List, Any
 
 import pandas as pd
 import requests
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
+import sys
 
-from configs.dev import BOT_TOKEN, FAST_API_TELEGRAM_URL, FAST_API_RECOMMENDER_URL
-from project_food.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
+sys.path.append("..")
+from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
+from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET
 
@@ -19,9 +23,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def parse_preprocess_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    request = FAST_API_TELEGRAM_URL + "/parse"
+    request = FAST_API_RECOMMENDER_URL + "/parse"
     df = pd.DataFrame(requests.get(request))
-    request = FAST_API_TELEGRAM_URL + '/preprocess'
+    request = FAST_API_RECOMMENDER_URL + '/preprocess'
     df = pd.DataFrame(requests.get(request))
     await update.message.reply_text('Recipes were successfully parsed and preprocessed.')
 
@@ -75,7 +79,7 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
         "The request is in process. Please, wait.",
         reply_markup=ReplyKeyboardRemove()
     )
-    request = FAST_API_TELEGRAM_URL + "/"
+    request = FAST_API_RECOMMENDER_URL + "/recipe/"
     if context.user_data[DEFAULT_RECOMMENDATION_OPTION] or context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION]:
         request = request + W2V_TF_IDF_RECOMMENDATION_OPTION
     elif context.user_data[TF_IDF_RECOMMENDATION_OPTION]:
@@ -101,11 +105,40 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
         'user_input': result_list
     }
     response = requests.get(request, params)
-    json_response = json.loads(response.text)
+    json_response = json.loads(response.content)
+
+    result_output = ''
+    try:
+        result_output = get_output(json_response)
+    except json.JSONDecodeError:
+        await update.message.reply_text(
+            "Server error. Please, try again later.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return ConversationHandler.END
     await update.message.reply_text(
-        json_response
+        result_output
     )
     return ConversationHandler.END
+
+
+def get_output(input_dict: dict) -> str:
+    list_input_keys = list(input_dict.keys())
+    parsed_name_ingredients = parse_name_ingredients(list_input_keys)
+    initial_output = "Based on the ingredients we recommend you to choose from: \n\n"
+    result = "".join(name + ingredients + '\n' for (name, ingredients) in parsed_name_ingredients)
+    return initial_output + result
+
+
+def parse_name_ingredients(input_result: List[str]) -> list[tuple[str, str]]:
+    list_name_ingredients = [ast.literal_eval(value) for value in input_result]
+    return [(name, prettify_output(ingredients)) for (name, ingredients) in list_name_ingredients]
+
+
+def prettify_output(input_string: str) -> str:
+    ingredients_list = ast.literal_eval(input_string)
+    ingredients_string = '\n'.join('\t' + ingredient for ingredient in ingredients_list)
+    return '\n' + ingredients_string + '\n'
 
 
 async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -1,0 +1,21 @@
+version: '1.0'
+
+services:
+
+  project_food:
+    build: project_food/.
+    container_name: project-food
+    ports:
+      - '8000:8000'
+    restart: unless-stopped
+
+  telegram:
+    build: telegram/.
+    container_name: telegram-app
+    ports:
+      - '4000:4000'
+    restart: unless-stopped
+    environment:
+      - telegram/configs/.env
+#      - 'CHATBOT_HOST=chatbot'
+#      - 'CHATBOT_PORT=8666'

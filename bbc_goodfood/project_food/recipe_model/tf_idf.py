@@ -6,11 +6,12 @@ import pandas as pd
 from Levenshtein import distance
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-from project_food.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
-from project_food.data.schema.recommendation_models import FittedTfIdfModel
-from project_food.data_preprocessing.preprocessing import DataPreprocessing
-from project_food.recipe_model.basic_model import BasicModel
+import sys
+sys.path.append("..")
+from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
+from data.schema.recommendation_models import FittedTfIdfModel
+from data_preprocessing.preprocessing import DataPreprocessing
+from recipe_model.basic_model import BasicModel
 
 
 class TF_IDF_RecipeRecommendation(BasicModel):

@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import sys
 sys.path.append("..")
-from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL
+from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL, NAME_COLUMN
 from data.schema.recommendation_models import FittedTfIdfModel
 from data_preprocessing.preprocessing import DataPreprocessing
 from recipe_model.basic_model import BasicModel
@@ -58,10 +58,12 @@ class TF_IDF_RecipeRecommendation(BasicModel):
         # todo
         # dense_input = input_tfidf.todense()
         # dense_model = self.tfidf_ingredients.todense()
-
+        print(pd.Series(
+            np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5))
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
-            index=self.df[INGREDIENTS_COLUMN]).sort_values(ascending=False).head(5)
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)
 
     def to_pickle(self, path: str = TF_IDF_MODEL):
         items = FittedTfIdfModel(

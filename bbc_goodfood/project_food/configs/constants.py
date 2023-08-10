@@ -1,5 +1,6 @@
 DATA_PATH_SHORT_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_short.csv'
-DATA_PATH_FULL_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_full.csv'
+DATA_PATH_FULL_CSV = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/csv_dataframe/data_goodfood_bbc_full.csv'
+# DATA_PATH_FULL_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_full.csv'
 # DATA_PARSED_PATH_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_parsed.csv'
 DATA_PARSED_PATH_CSV = r'data/csv_dataframe/data_goodfood_bbc_parsed.csv'
 
@@ -9,8 +10,9 @@ DATA_PARSED_PATH_PICKLE = r'/project_food/data/structured_data/data_goodfood_bbc
 
 TF_IDF_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/tf_idf_model.pickle'
 CV_MODEL = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/tf_idf/cv_model.pickle'
-WORD2VEC_MODEL = 'data/word2vec/word2vec.pickle'
-# WORD2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec.pickle'
+WORD2VEC_MODEL_MEAN = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec_mean.pickle'
+WORD2VEC_MODEL_TF_IDF = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec_tf_idf.pickle'
+# WORD2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec_mean.pickle'
 
 INGREDIENTS_COLUMN = "ingredients"
 NAME_COLUMN = "name"

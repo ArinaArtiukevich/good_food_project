@@ -12,7 +12,7 @@ from recipe_model.tf_idf import TF_IDF_RecipeRecommendation
 from recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
 
 from configs.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
-     DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL, TF_IDF_MODEL
+     DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, TF_IDF_MODEL
 
 app = FastAPI()
 
@@ -74,28 +74,28 @@ async def train_recipe_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: 
 
 
 @app.get("/recipe/w2v_mean")
-async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL, user_input: List[str] | None = Query()):
+async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL_MEAN, user_input: List[str] | None = Query()):
     model = MeanWord2Vec.from_pickle(path=path)
     response = model.get_recommendations(str(user_input))
     return Response(response.to_json(), media_type="application/json")
 
 
 @app.get("/recipe/train/w2v_mean")
-async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
+async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL_MEAN):
     model = MeanWord2Vec.create_instance(path=data_path).train_model()
     model.to_pickle(path=save_path)
     return status.HTTP_201_CREATED
 
 
 @app.get("/recipe/w2v_tf_idf")
-async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL, user_input: List[str] | None = Query()):
+async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL_TF_IDF, user_input: List[str] | None = Query()):
     model = TfIdfWord2Vec.from_pickle(path=path)
     response = model.get_recommendations(str(user_input))
     return Response(response.to_json(), media_type="application/json")
 
 
 @app.get("/recipe/train/w2v_tf_idf")
-async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
+async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL_TF_IDF):
     model = TfIdfWord2Vec.create_instance(path=data_path).train_model()
     model.to_pickle(path=save_path)
     return status.HTTP_201_CREATED

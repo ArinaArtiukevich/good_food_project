@@ -6,7 +6,7 @@ import requests
 from fastapi import FastAPI, Query
 from typing import List
 
-from configs.constants import TF_IDF_MODEL, TF_IDF_RECOMMENDATION_OPTION, DATA_PARSED_PATH_CSV, WORD2VEC_MODEL, \
+from configs.constants import TF_IDF_MODEL, TF_IDF_RECOMMENDATION_OPTION, DATA_PARSED_PATH_CSV, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, \
     W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION
 import configs.dev as dev
 
@@ -50,7 +50,7 @@ async def train_recipe_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: 
 
 
 @app.get("/w2v_mean")
-async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL, user_input: List[str] | None = Query()):
+async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL_MEAN, user_input: List[str] | None = Query()):
     params = {
         'path': path,
         'user_input': user_input
@@ -61,7 +61,7 @@ async def get_recipe_w2v_mean(path: str = WORD2VEC_MODEL, user_input: List[str] 
 
 
 @app.get("/train/w2v_mean")
-async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
+async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL_MEAN):
     params = {
         'data_path': data_path,
         'save_path': save_path
@@ -72,7 +72,7 @@ async def train_recipe_w2v_mean(data_path: str = DATA_PARSED_PATH_CSV, save_path
 
 
 @app.get("/w2v_tf_idf")
-async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL, user_input: List[str] | None = Query()):
+async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL_TF_IDF, user_input: List[str] | None = Query()):
     params = {
         'path': path,
         'user_input': user_input
@@ -84,7 +84,7 @@ async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL, user_input: List[str
 
 
 @app.get("/train/w2v_tf_idf")
-async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL):
+async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL_TF_IDF):
     params = {
         'data_path': data_path,
         'save_path': save_path

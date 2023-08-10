@@ -11,7 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import sys
 
 sys.path.append("..")
-from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL, \
+from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, \
     INGREDIENTS_PARSED_COLUMN, NAME_COLUMN
 from data.schema.recommendation_models import NamedWord2Vec
 from data_preprocessing.preprocessing import DataPreprocessing
@@ -53,7 +53,7 @@ class CustomWord2Vec(BasicModel):
     def get_recommendations(self, user_input: str) -> pd.Series:
         ...
 
-    def to_pickle(self, path: str = WORD2VEC_MODEL):
+    def to_pickle(self, path: WORD2VEC_MODEL_MEAN):
         items = NamedWord2Vec(
             df=self.df,
             w2v_model=self.w2v_model,
@@ -62,7 +62,7 @@ class CustomWord2Vec(BasicModel):
         joblib.dump(items, path)
 
     @classmethod
-    def from_pickle(cls, path: str = WORD2VEC_MODEL) -> "CustomWord2Vec":
+    def from_pickle(cls, path: WORD2VEC_MODEL_MEAN) -> "CustomWord2Vec":
         w2v_model = joblib.load(path)
         return cls(w2v_model.df, w2v_model.w2v_model, w2v_model.val)
 
@@ -102,7 +102,7 @@ class MeanWord2Vec(CustomWord2Vec):
 
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(transformed_input, x), doc_model)))).ravel(),
-            index=self.df[INGREDIENTS_COLUMN]).sort_values(ascending=False).head(5)
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)
 
 
 class TfIdfWord2Vec(CustomWord2Vec):

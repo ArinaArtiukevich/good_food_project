@@ -4,6 +4,7 @@ from typing import Tuple, List, Any
 
 import pandas as pd
 import requests
+from starlette import status
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
 import sys
@@ -22,12 +23,41 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello there! What ingredients do you have?')
 
 
-async def parse_preprocess_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    request = FAST_API_RECOMMENDER_URL + "/parse"
+async def parse_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    request = FAST_API_RECOMMENDER_URL + '/data/parse/csv'
     df = pd.DataFrame(requests.get(request))
-    request = FAST_API_RECOMMENDER_URL + '/preprocess'
+    await update.message.reply_text('Recipes were successfully parsed.')
+
+
+async def preprocess_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    request = FAST_API_RECOMMENDER_URL + '/data/preprocess/csv'
     df = pd.DataFrame(requests.get(request))
-    await update.message.reply_text('Recipes were successfully parsed and preprocessed.')
+    await update.message.reply_text('Recipes were successfully preprocessed.')
+
+
+async def train_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = "Server error. Please, try again later."
+    try:
+        request = FAST_API_RECOMMENDER_URL + '/recipe/train/'
+
+        response_tf_idf = requests.get(request + TF_IDF_RECOMMENDATION_OPTION)
+        response_w2v_mean = requests.get(request + W2V_MEAN_RECOMMENDATION_OPTION)
+        response_w2v_tf_idf = requests.get(request + W2V_TF_IDF_RECOMMENDATION_OPTION)
+
+        if response_tf_idf.content is status.HTTP_201_CREATED and \
+                response_w2v_mean.content is status.HTTP_201_CREATED and \
+                response_w2v_tf_idf.content is status.HTTP_201_CREATED:
+            message = 'Models were successfully trained.'
+
+    except Exception:
+        await update.message.reply_text(
+            message,
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return ConversationHandler.END
+
+    await update.message.reply_text('Models were successfully trained.')
+    return ConversationHandler.END
 
 
 async def recipe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -82,32 +112,34 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
     request = FAST_API_RECOMMENDER_URL + "/recipe/"
     if context.user_data[DEFAULT_RECOMMENDATION_OPTION] or context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION]:
         request = request + W2V_TF_IDF_RECOMMENDATION_OPTION
+        context.user_data[DEFAULT_RECOMMENDATION_OPTION] = 0
+        context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION] = 0
     elif context.user_data[TF_IDF_RECOMMENDATION_OPTION]:
         request = request + TF_IDF_RECOMMENDATION_OPTION
+        context.user_data[TF_IDF_RECOMMENDATION_OPTION] = 0
     elif context.user_data[W2V_MEAN_RECOMMENDATION_OPTION]:
         request = request + W2V_MEAN_RECOMMENDATION_OPTION
+        context.user_data[W2V_MEAN_RECOMMENDATION_OPTION] = 0
     else:
         await update.message.reply_text(
             "Something went wrong. Please, try again later.",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-
-    ingredients_input = update.message.text
-    result_list = ingredients_input.split(", ")
-    if len(result_list) <= 1:
+    print(request)
+    try:
+        ingredients_input = preprocess_user_input(update.message.text)
+    except ValueError as err:
         await update.message.reply_text(
-            "Incorrect input. Please, try again later.",
+            str(err),
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
     params = {
-        'user_input': result_list
+        'user_input': ingredients_input
     }
     response = requests.get(request, params)
     json_response = json.loads(response.content)
-
-    result_output = ''
     try:
         result_output = get_output(json_response)
     except json.JSONDecodeError:
@@ -122,12 +154,20 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
     return ConversationHandler.END
 
 
+def preprocess_user_input(ingredients_input: str) -> List[str]:
+    result_list = ingredients_input.split(", ")
+    if len(result_list) <= 1:
+        raise ValueError("Please, enter several ingredients divided by coma.")
+    return result_list
+
+
 def get_output(input_dict: dict) -> str:
     list_input_keys = list(input_dict.keys())
     parsed_name_ingredients = parse_name_ingredients(list_input_keys)
     initial_output = "Based on the ingredients we recommend you to choose from: \n\n"
     result = "".join(name + ingredients + '\n' for (name, ingredients) in parsed_name_ingredients)
-    return initial_output + result
+    end_output = "\n\n Please, visit https://www.bbcgoodfood.com/ to see more details."
+    return initial_output + result + end_output
 
 
 def parse_name_ingredients(input_result: List[str]) -> list[tuple[str, str]]:
@@ -153,39 +193,42 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error {context.error}')
 
 
-#
-# def handle_response(text: str) -> str:
-#     # Create your own response logic
-#     processed: str = text.lower()
-#
-#     if 'hello' in processed:
-#         return 'Hey there!'
-#
-#     if 'how are you' in processed:
-#         return 'I\'m good!'
-#
-#     if 'i love python' in processed:
-#         return 'Remember to subscribe!'
-#
-#     return 'I don\'t understand'
-#
-#
-# async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     message_type: str = update.message.chat.type
-#     text: str = update.message.text
-#
-#     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
-#
-#     response: str = handle_response(text)
-#     await update.message.reply_text(response)
-#
+def handle_response(text: str) -> str:
+    try:
+        ingredients_input = preprocess_user_input(text)
+    except ValueError as err:
+        result_output = str(err)
+        return result_output
+    params = {
+        'user_input': ingredients_input
+    }
+    response = requests.get(FAST_API_RECOMMENDER_URL + '/recipe/' + W2V_TF_IDF_RECOMMENDATION_OPTION, params)
+    json_response = json.loads(response.content)
+    try:
+        result_output = get_output(json_response)
+    except json.JSONDecodeError:
+        return "Server error. Please, try again later."
+    return result_output
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message_type = update.message.chat.type
+    text = update.message.text
+
+    print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
+
+    response = handle_response(text)
+    await update.message.reply_text(response)
+
 
 if __name__ == '__main__':
     app = Application.builder().token(BOT_TOKEN).build()
 
     # Commands
     app.add_handler(CommandHandler('start', start_command))
-    app.add_handler(CommandHandler('parse', parse_preprocess_command))
+    app.add_handler(CommandHandler('parse', parse_command))
+    app.add_handler(CommandHandler('preprocess', preprocess_command))
+    app.add_handler(CommandHandler('train', train_command))
 
     conv_handler = ConversationHandler(
         entry_points=[
@@ -202,7 +245,7 @@ if __name__ == '__main__':
     app.add_handler(conv_handler)
 
     # Messages
-    # app.add_handler(MessageHandler(filters.TEXT, handle_message))
+    app.add_handler(MessageHandler(filters.TEXT, handle_message))
 
     # Log all errors
     app.add_error_handler(error)

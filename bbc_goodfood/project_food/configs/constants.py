@@ -2,7 +2,8 @@ DATA_PATH_SHORT_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_short
 DATA_PATH_FULL_CSV = r'/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/csv_dataframe/data_goodfood_bbc_full.csv'
 # DATA_PATH_FULL_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_full.csv'
 # DATA_PARSED_PATH_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_parsed.csv'
-DATA_PARSED_PATH_CSV = r'data/csv_dataframe/data_goodfood_bbc_parsed.csv'
+# DATA_PARSED_PATH_CSV = r'data/csv_dataframe/data_goodfood_bbc_parsed.csv'
+DATA_PARSED_PATH_CSV = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/csv_dataframe/data_goodfood_bbc_parsed.csv'
 
 DATA_PATH_SHORT_PICKLE = r'/project_food/data/structured_data/data_goodfood_bbc_short.pickle'
 DATA_PATH_FULL_PICKLE = r'/project_food/data/structured_data/data_goodfood_bbc_full.pickle'
@@ -14,7 +15,27 @@ WORD2VEC_MODEL_MEAN = '/Users/arina/study/ds/project/food_recommendation/bbc_goo
 WORD2VEC_MODEL_TF_IDF = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec_tf_idf.pickle'
 # WORD2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/word2vec/word2vec_mean.pickle'
 
+DOC2VEC_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/doc2vec/doc2vec.pickle'
+
+
+MOBILENET_V5_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/photo2ingredients/trained_model/photo2ingredients.h5'
+SLIDED_IMAGES_PATH = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/photo2ingredients/images'
+SLIDED_IMAGES_FOLDER = '/slided_images/'
+TABLE_CLASS = 'table'
+IMG_SIZE = 224
+AVAILABLE_INGREDIENT_NAMES = [
+                                 'apple', 'asparagus', 'aubergine', 'avocado', 'banana', 'beans', 'beetroot',
+                                 'cabbage', 'carrots', 'cauliflower', 'corn', 'cucumber', 'garlic', 'ginger',
+                                 'grapes', 'jalepeno', 'juice', 'kiwi', 'leek', 'lemon', 'lettuce', 'lime',
+                                 'mango', 'melon', 'milk', 'mushroom', 'nectarine', 'oat-milk', 'oatghurt',
+                                 'onion', 'orange', 'papaya', 'passion-fruit', 'peach', 'pear', 'peas',
+                                 'pepper', 'pineapple', 'plum', 'pomegranate', 'potato', 'raddish', 'red-beet',
+                                 'red-grapefruit', 'satsumas', 'sour-cream', 'sour-milk', 'soy-milk', 'soyghurt',
+                                 'spinach', 'table', 'tomato', 'turnip', 'watermelon', 'yoghurt', 'zucchini'
+                             ]
+
 INGREDIENTS_COLUMN = "ingredients"
+TYPES_COLUMN = "types"
 NAME_COLUMN = "name"
 INGREDIENTS_PARSED_COLUMN = "ingredients_parsed"
 DATAFRAME_INIT_COLUMNS = ['cuisine', 'types', 'name', 'ingredients', 'difficulty', "health_banners"]

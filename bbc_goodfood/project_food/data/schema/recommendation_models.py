@@ -2,7 +2,7 @@ from typing import NamedTuple, List
 
 import numpy as np
 import pandas as pd
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, Doc2Vec
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
@@ -18,3 +18,7 @@ class NamedWord2Vec(NamedTuple):
     w2v_model: Word2Vec
     val: List
 
+
+class NamedDoc2Vec(NamedTuple):
+    df: pd.DataFrame
+    d2v_model: Doc2Vec

@@ -52,15 +52,12 @@ class TF_IDF_RecipeRecommendation(BasicModel):
 
     def get_recommendations(self, user_input: str):
         preprocessed_input = pd.Series([(DataPreprocessing().preprocess_request(user_input))]).astype(str)
-        print(self.cv)
         input_cv = self.cv.transform(preprocessed_input)
         input_tfidf = self.tfidf.transform(input_cv)
         # todo
         # dense_input = input_tfidf.todense()
         # dense_model = self.tfidf_ingredients.todense()
-        print(pd.Series(
-            np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
-            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5))
+
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
             index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)

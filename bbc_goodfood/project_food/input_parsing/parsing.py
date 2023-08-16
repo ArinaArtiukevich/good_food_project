@@ -89,7 +89,6 @@ class BBCRecipesParses(RecipeParser):
             except:
                 # TODO
                 print("find_all None error thing. Ignore this page")
-        print(len(result))
         return result
 
     def get_recipes_from_page(self, recipe_parser: bs4.BeautifulSoup, recipe_title: str) -> ExtendedRecipeModel:

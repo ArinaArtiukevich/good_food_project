@@ -1,18 +1,23 @@
+from io import BytesIO
 from typing import List
 
 import joblib
 import pandas as pd
 import uvicorn
 import sys
+
+from PIL import Image
+
 sys.path.append("..")
-from fastapi import FastAPI, Response, Query, status
+from fastapi import FastAPI, Response, Query, status, UploadFile, File
 from data_preprocessing.preprocessing import DataPreprocessing
 from input_parsing.parsing import BBCRecipesParses
 from recipe_model.tf_idf import TF_IDF_RecipeRecommendation
 from recipe_model.word2vec import TfIdfWord2Vec, MeanWord2Vec
-
+from recipe_model.doc2vec import CustomDoc2Vec
+from recipe_model.photo2ingredients import Photo2Ingredients, Photo2MultipleIngredients
 from configs.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATA_PARSED_PATH_PICKLE, DATA_PARSED_PATH_CSV, \
-     DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, TF_IDF_MODEL
+    DROP_DUPLICATES_BY_COLUMN, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, TF_IDF_MODEL, DOC2VEC_MODEL
 
 app = FastAPI()
 
@@ -41,7 +46,6 @@ async def parse_recipe_pickle(load_path: str = DATA_PATH_FULL_PICKLE, save_path:
     recipes_list = joblib.load(load_path)
     dt_preprocess = DataPreprocessing()
     unique_recipes_list = list(set(recipes_list))
-    print(unique_recipes_list)
     preprocessed_list = dt_preprocess.preprocess_list(unique_recipes_list)
     joblib.dump(preprocessed_list, save_path)
 
@@ -64,6 +68,7 @@ async def get_recipe_tf_idf(save_path: str = TF_IDF_MODEL, user_input: List[str]
     model = TF_IDF_RecipeRecommendation.from_pickle(path=save_path)
     response = model.get_recommendations(str(user_input))
     return Response(response.to_json(), media_type="application/json")
+
 
 
 @app.get("/recipe/train/tf_idf")
@@ -97,6 +102,43 @@ async def get_recipe_w2v_tf_idf(path: str = WORD2VEC_MODEL_TF_IDF, user_input: L
 @app.get("/recipe/train/w2v_tf_idf")
 async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = WORD2VEC_MODEL_TF_IDF):
     model = TfIdfWord2Vec.create_instance(path=data_path).train_model()
+    model.to_pickle(path=save_path)
+    return status.HTTP_201_CREATED
+
+
+@app.post("/photo2ingredients")
+async def get_ingredients_from_photo(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+    image_pil = Image.open(BytesIO(image_bytes))
+    img2ingredients = Photo2MultipleIngredients()
+    return img2ingredients.predict_ingredients(image_pil)
+
+
+@app.get("/recipe/doc2vec")
+async def get_recipe_d2v(path: str = DOC2VEC_MODEL, user_input: List[str] | None = Query()):
+    model = CustomDoc2Vec.from_pickle(path=path)
+    response = model.get_recommendations(str(user_input))
+    result_dict = {}
+    for idx, row in response.iterrows():
+        row_values = row.values.tolist()
+        result_dict[str(tuple(row_values))] = idx
+    return result_dict
+
+
+@app.get("/recipe/doc2vec")
+async def get_recipe_d2v(category: str, data_path: str = DATA_PARSED_PATH_CSV, user_input: List[str] | None = Query()):
+    model = CustomDoc2Vec.create_instance(path=data_path).train_model(category=category)
+    response = model.get_recommendations(str(user_input))
+    result_dict = {}
+    for idx, row in response.iterrows():
+        row_values = row.values.tolist()
+        result_dict[str(tuple(row_values))] = idx
+    return result_dict
+
+
+@app.get("/recipe/train/doc2vec")
+async def train_recipe_doc2vec(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = DOC2VEC_MODEL):
+    model = CustomDoc2Vec.create_instance(path=data_path).train_model()
     model.to_pickle(path=save_path)
     return status.HTTP_201_CREATED
 

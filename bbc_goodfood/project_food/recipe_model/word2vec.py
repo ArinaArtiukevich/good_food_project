@@ -115,12 +115,14 @@ class TfIdfWord2Vec(CustomWord2Vec):
         return cls(df=cls.get_df_from_csv(path)) if from_csv else cls(df=cls.get_df_from_pickle(path))
 
     def train_model(self):
-        self.val = [[word for sentence in ast.literal_eval(ingredients) for word in sentence.split()] for ingredients in
-                    self.df[INGREDIENTS_PARSED_COLUMN].values]
-        # self.val = [ast.literal_eval(ingredients) for ingredients in self.df[INGREDIENTS_PARSED_COLUMN].values]
+        # self.val = [[word for sentence in ast.literal_eval(ingredients) for word in sentence.split()] for ingredients in
+        #             self.df[INGREDIENTS_PARSED_COLUMN].values]
+        self.val = [ast.literal_eval(ingredients) for ingredients in self.df[INGREDIENTS_PARSED_COLUMN].values]
         # todo same with input
         # can be with or without
+
         self.val = self.get_and_sort_corpus(self.val)
+        # print(self.val)
         self.w2v_model = Word2Vec(
             sg=0, workers=1, window=2, min_count=2
         )
@@ -169,14 +171,16 @@ class TfIdfWord2Vec(CustomWord2Vec):
 
         cos_sim = map(lambda x: cosine_similarity(transformed_input, x)[0][0], doc_model)
         scores = list(cos_sim)
-
+        print(pd.Series(
+            np.array(list((map(lambda x: cosine_similarity(transformed_input, x), doc_model)))).ravel(),
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5))
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(transformed_input, x), doc_model)))).ravel(),
             index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)
 
 
 if __name__ == "__main__":
-    # model = MeanWord2Vec.create_instance().train_model()
+    model = MeanWord2Vec.create_instance().train_model()
     #
     # # print(model.w2v_model)
     # # words = list(model.w2v_model.wv.index_to_key)
@@ -185,15 +189,18 @@ if __name__ == "__main__":
     # # print(model.w2v_model.wv['chicken stock'])
     # # print(model.w2v_model.wv.most_similar(u'cinnamon'))
     # # print(model.w2v_model.wv.similarity('coconut yogurt', 'yogurt'))
-    #
-    # user_inp = "['cinnamon', 'sugar', 'apple', 'flour', 'butter']"
-    # rec = model.get_recommendations(user_inp)
-    # print(rec)
 
-    tfidf_word_to_vec = TfIdfWord2Vec.create_instance().train_model()
     user_inp = "['cinnamon', 'sugar', 'apple', 'flour', 'butter']"
-    rec = tfidf_word_to_vec.get_recommendations(user_inp)
+    rec = model.get_recommendations(user_inp)
     print(rec)
 
-    tfidf_word_to_vec.to_pickle()
-    tfidf_word_to_vec.from_pickle()
+    # tfidf_word_to_vec = TfIdfWord2Vec.create_instance().train_model()
+    # user_inp = "['milk', 'coffee', 'chocolate']"
+    # rec = tfidf_word_to_vec.get_recommendations(user_inp)
+    # print(rec)
+    #
+    # tfidf_word_to_vec.to_pickle()
+    # tfidf_word_to_vec.from_pickle()
+
+
+

@@ -17,5 +17,6 @@ services:
     restart: unless-stopped
     environment:
       - telegram/configs/.env
+#      - todo del
 #      - 'CHATBOT_HOST=chatbot'
 #      - 'CHATBOT_PORT=8666'

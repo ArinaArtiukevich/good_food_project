@@ -8,6 +8,8 @@ class RecipeModel(NamedTuple):
     ingredients: str
     difficulty: str
     health_banners: List[str]
+    instructions: str
+    link: str
 
 
 class RecipeParsedModel(NamedTuple):
@@ -18,6 +20,8 @@ class RecipeParsedModel(NamedTuple):
     difficulty: str
     health_banners: List[str]
     ingredients_parsed: List[str]
+    instructions: List[str]
+    link: str
 
 
 class ExtendedRecipeModel(RecipeModel):

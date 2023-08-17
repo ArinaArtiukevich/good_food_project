@@ -8,6 +8,7 @@ from typing import List
 from starlette import status
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandler, filters, ConversationHandler
+import sys
 
 sys.path.append("..")
 from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
@@ -388,7 +389,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    app = Application.builder().token(BOT_TOKEN).build()
+    print(BOT_TOKEN)
+    app = Application.builder().token(token='6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0').build()
 
     # Commands
     app.add_handler(CommandHandler('start', start_command))

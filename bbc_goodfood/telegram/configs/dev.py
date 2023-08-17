@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 env_path = os.path.join(os.path.dirname(__file__), '.env')
-# todo del загружаем в окружение
+
 load_dotenv(env_path)
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')

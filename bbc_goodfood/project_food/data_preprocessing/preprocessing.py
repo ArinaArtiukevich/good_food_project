@@ -150,7 +150,9 @@ class DataPreprocessing:
                     ingredients=recipe.ingredients,
                     difficulty=recipe.difficulty,
                     health_banners=recipe.health_banners,
-                    ingredients_parsed=ingredients_parsed
+                    ingredients_parsed=ingredients_parsed,
+                    instructions=recipe.instructions,
+                    link=recipe.link
                 )
             )
         return parsed_recipes_list

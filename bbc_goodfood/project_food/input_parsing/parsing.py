@@ -38,16 +38,17 @@ class BBCRecipesParses(RecipeParser):
     def parse_recipes(self, url: str = URL, return_dataframe: bool = True) -> List[ExtendedRecipeModel] | pd.DataFrame:
         input_recipes = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []
         pages = math.ceil(self.EXPECTED_NUMBER_OF_RECIPIES / 30)
-        for page in range(66, pages):
+        print(pages)
+        for page in range(29, pages):
             current_url = url + self.PAGE_PARAM + str(page)
             print(current_url)
             temp = self.generate_dataset(url=current_url, return_dataframe=return_dataframe)
             input_recipes = input_recipes.append(temp) if return_dataframe else input_recipes + temp
             # todo del
-            joblib.dump(input_recipes, DATA_PATH_FULL_PICKLE)
+            # joblib.dump(input_recipes, DATA_PATH_FULL_PICKLE)
             df = pd.DataFrame(input_recipes)
             df.to_csv(
-                DATA_PATH_FULL_CSV,
+                '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/expanded_csv_dataframe/expanded_bbc_good_food_dataframe.csv',
                 sep="\t", index=False)
 
         self.driver.close()
@@ -61,7 +62,6 @@ class BBCRecipesParses(RecipeParser):
         for article in articles:
             recipe_url = article.find('a').get('href')
             recipe_title = article.find('h2', attrs={'class': 'heading-4'}).getText()
-            print(recipe_title)
             recipe_request = ""
             while recipe_request == "":
                 try:
@@ -70,7 +70,6 @@ class BBCRecipesParses(RecipeParser):
                 except requests.exceptions.ConnectionError:
                     # TODO
                     print("exc")
-                    time.sleep(5)
                     continue
             recipe_parser = bs4.BeautifulSoup(recipe_request.text, features="html.parser")
             try:
@@ -82,7 +81,9 @@ class BBCRecipesParses(RecipeParser):
                        parsed_recipe.name,
                        parsed_recipe.ingredients,
                        parsed_recipe.difficulty,
-                       parsed_recipe.health_banners
+                       parsed_recipe.health_banners,
+                       parsed_recipe.instructions,
+                       parsed_recipe.link
                     ]
                 else:
                     result.append(parsed_recipe)
@@ -98,17 +99,23 @@ class BBCRecipesParses(RecipeParser):
         ingredients_space = recipe_parser.find('section', attrs={'class': 'recipe__ingredients'})
         planner_space = recipe_parser.find('ul', attrs={'class': 'post-header__planning'})
         health_banners_space = recipe_parser.find('ul', attrs={'class': 'post-header__term-icons-list'})
+        instructions_space = recipe_parser.find('section', attrs={'class': 'recipe__method-steps'})
 
+        current_link = recipe_parser.find('link', attrs={'data-testid': "meta-canonical"}).get('href')
         ingredients = self.get_ingredients(ingredients_space)
         planner_soup = planner_space.find('div', attrs={'class': 'post-header__skill-level'})
         health_banners = self.get_health_banners(health_banners_space)
+        instructions = self.get_instructions(instructions_space)
+
         recipe = ExtendedRecipeModel(
             cuisine=tags['cuisine'] if 'cuisine' in tags else None,
             types=tags['meal-type'] if 'meal-type' in tags else None,
             name=recipe_title,
             ingredients=str(ingredients),
             difficulty=planner_soup.getText(),
-            health_banners=health_banners
+            health_banners=health_banners,
+            instructions=str(instructions),
+            link=current_link
         )
         return recipe
 
@@ -120,6 +127,18 @@ class BBCRecipesParses(RecipeParser):
         parsed_articles = driver_parser.find_all('article', attrs={
             'class': 'card text-align-left card--horizontal card--inline card--with-borders'})
         return parsed_articles
+
+    def get_instructions(self, instructions_space: bs4.Tag):
+        instructions = []
+        try:
+            instructions_soup = instructions_space.find_all('div', attrs={
+                'class': 'editor-content'})
+            for instruction in range(len(instructions_soup)):
+                instructions.append(instructions_soup[instruction].getText())
+        except AttributeError:
+            # TODO find_all - nothing
+            ...
+        return instructions
 
     def get_ingredients(self, ingredients_space: bs4.Tag):
         ingredients = []

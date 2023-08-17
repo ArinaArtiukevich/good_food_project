@@ -21,12 +21,7 @@ class CustomDoc2Vec(BasicModel):
         self.df = df
         self.d2v_model = d2v_model
 
-    def train_model(self, category: str = None):
-        if category is not None:
-            self.df[TYPES_COLUMN] = self.df[TYPES_COLUMN].apply(
-                lambda lst_str: ast.literal_eval(lst_str) if isinstance(lst_str, str) else lst_str)
-            boolean_series = self.df[TYPES_COLUMN].apply(lambda lst: category in lst if isinstance(lst, list) else False)
-            self.df = self.df[boolean_series]
+    def train_model(self):
         ingredients_data = self.df[INGREDIENTS_PARSED_COLUMN].tolist()
         tagged_data = [
             TaggedDocument(
@@ -44,12 +39,23 @@ class CustomDoc2Vec(BasicModel):
         self.d2v_model.train(tagged_data, total_examples=self.d2v_model.corpus_count, epochs=20)
         return self
 
-    def get_recommendations(self, user_input: str) -> DataFrame:
+    def get_recommendations(self, user_input: str, category: str = None) -> DataFrame:
         user_input_list = DataPreprocessing().preprocess_request(user_input)
         embeddings = self.d2v_model.infer_vector(user_input_list)
-        best_recipes = self.d2v_model.dv.most_similar([embeddings], topn=5)
-        ids = [row_id[0] for row_id in best_recipes]
-        selected_rows = self.df.iloc[ids]
+        if category is None:
+            best_recipes = self.d2v_model.dv.most_similar([embeddings], topn=5)
+            ids = [row_id[0] for row_id in best_recipes]
+            selected_rows = self.df.iloc[ids]
+        else:
+            print("2")
+            best_recipes = self.d2v_model.dv.most_similar([embeddings], topn=200)
+            doc_indices = [int(doc_idx) for doc_idx, _ in best_recipes]
+            new_df = self.df.loc[doc_indices].copy()
+            new_df[TYPES_COLUMN] = new_df[TYPES_COLUMN].apply(
+                lambda lst_str: ast.literal_eval(lst_str) if isinstance(lst_str, str) else lst_str)
+            boolean_series = new_df[TYPES_COLUMN].apply(lambda lst: category in lst if isinstance(lst, list) else False)
+            selected_rows = new_df[boolean_series]
+        print(selected_rows)
         selected_columns = [NAME_COLUMN, INGREDIENTS_COLUMN]
         selected_list = [selected_rows[column] for column in selected_columns]
         return pd.concat(selected_list, axis=1)

@@ -70,7 +70,6 @@ async def get_recipe_tf_idf(save_path: str = TF_IDF_MODEL, user_input: List[str]
     return Response(response.to_json(), media_type="application/json")
 
 
-
 @app.get("/recipe/train/tf_idf")
 async def train_recipe_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_path: str = TF_IDF_MODEL):
     model = TF_IDF_RecipeRecommendation.create_instance(from_csv=True, path=data_path).prepare_model()
@@ -107,6 +106,14 @@ async def train_recipe_w2v_tf_idf(data_path: str = DATA_PARSED_PATH_CSV, save_pa
 
 
 @app.post("/photo2ingredients")
+async def get_ingredient_from_photo(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+    image_pil = Image.open(BytesIO(image_bytes))
+    img2ingredients = Photo2Ingredients()
+    return img2ingredients.predict_ingredients(image_pil)
+
+
+@app.post("/photo2multiple_ingredients")
 async def get_ingredients_from_photo(image: UploadFile = File(...)):
     image_bytes = await image.read()
     image_pil = Image.open(BytesIO(image_bytes))
@@ -125,10 +132,10 @@ async def get_recipe_d2v(path: str = DOC2VEC_MODEL, user_input: List[str] | None
     return result_dict
 
 
-@app.get("/recipe/doc2vec")
-async def get_recipe_d2v(category: str, data_path: str = DATA_PARSED_PATH_CSV, user_input: List[str] | None = Query()):
-    model = CustomDoc2Vec.create_instance(path=data_path).train_model(category=category)
-    response = model.get_recommendations(str(user_input))
+@app.get("/recipe/doc2vec/category")
+async def get_recipe_d2v_category(category: str, path: str = DOC2VEC_MODEL, user_input: List[str] | None = Query()):
+    model = CustomDoc2Vec.from_pickle(path=path)
+    response = model.get_recommendations(str(user_input), category=category).head(5)
     result_dict = {}
     for idx, row in response.iterrows():
         row_values = row.values.tolist()

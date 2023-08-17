@@ -22,6 +22,7 @@ MOBILENET_V5_MODEL = '/Users/arina/study/ds/project/food_recommendation/bbc_good
 SLIDED_IMAGES_PATH = '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/photo2ingredients/images'
 SLIDED_IMAGES_FOLDER = '/slided_images/'
 TABLE_CLASS = 'table'
+TABLE_INDEX = 49
 IMG_SIZE = 224
 AVAILABLE_INGREDIENT_NAMES = [
                                  'apple', 'asparagus', 'aubergine', 'avocado', 'banana', 'beans', 'beetroot',
@@ -29,7 +30,7 @@ AVAILABLE_INGREDIENT_NAMES = [
                                  'grapes', 'jalepeno', 'juice', 'kiwi', 'leek', 'lemon', 'lettuce', 'lime',
                                  'mango', 'melon', 'milk', 'mushroom', 'nectarine', 'oat-milk', 'oatghurt',
                                  'onion', 'orange', 'papaya', 'passion-fruit', 'peach', 'pear', 'peas',
-                                 'pepper', 'pineapple', 'plum', 'pomegranate', 'potato', 'raddish', 'red-beet',
+                                 'pepper', 'pineapple', 'plum', 'pomegranate', 'potato', 'raddish',
                                  'red-grapefruit', 'satsumas', 'sour-cream', 'sour-milk', 'soy-milk', 'soyghurt',
                                  'spinach', 'table', 'tomato', 'turnip', 'watermelon', 'yoghurt', 'zucchini'
                              ]

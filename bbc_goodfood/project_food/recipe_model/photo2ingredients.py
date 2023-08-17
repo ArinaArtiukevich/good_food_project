@@ -12,21 +12,22 @@ import sys
 
 sys.path.append("..")
 from configs.constants import MOBILENET_V5_MODEL, IMG_SIZE, SLIDED_IMAGES_PATH, SLIDED_IMAGES_FOLDER, TABLE_CLASS, \
-    AVAILABLE_INGREDIENT_NAMES
+    AVAILABLE_INGREDIENT_NAMES, TABLE_INDEX
 
 
 class Photo2Ingredients:
     def __init__(self, model_path: str = MOBILENET_V5_MODEL):
         self.model = keras.models.load_model(model_path)
 
-    def get_ingredients(self, image_file: Image):
+    def predict_ingredients(self, image_file: Image):
         image_resized = image_file.resize((IMG_SIZE, IMG_SIZE))
         image_array = image.img_to_array(image_resized)
         img_array = np.array([image_array])
         prediction = self.model.predict(img_array)
+        prediction[0][TABLE_INDEX] = float('-inf')
         predicted_index = np.argmax(prediction)
-        predicted_class_name = AVAILABLE_INGREDIENT_NAME[predicted_index]
-        return predicted_class_name
+        predicted_class_name = AVAILABLE_INGREDIENT_NAMES[predicted_index]
+        return [predicted_class_name]
 
 
 class Photo2MultipleIngredients:

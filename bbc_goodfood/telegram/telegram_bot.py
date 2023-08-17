@@ -15,7 +15,8 @@ from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET, TELEGRAM_PHOTO_START_CONVERSATION, INGREDIENTS_FIELD, \
     D2V_RECOMMENDATION_OPTION, MIN_RECIPE_CATEGORY, AVAILABLE_RECIPE_CATEGORY, RECIPE_CATEGORY_MESSAGE, \
-    GENERAL_INGREDIENTS_QUESTION, USER_INPUT_CATEGORY
+    GENERAL_INGREDIENTS_QUESTION, USER_INPUT_CATEGORY, MULTIPLE_INGREDIENTS_ON_PHOTO, SINGLE_INGREDIENT_ON_PHOTO, \
+    INGREDIENTS_RECOGNITION_ON_PHOTO
 
 RECIPE_RECOMMENDER = 0
 PHOTO_2_INGREDIENTS = 1
@@ -94,7 +95,7 @@ async def choose_category_command(update: Update, context: ContextTypes.DEFAULT_
         GENERAL_INGREDIENTS_QUESTION,
         reply_markup=ReplyKeyboardRemove()
     )
-    return
+    return PHOTO_RECIPE_RECOMMENDER
 
 
 async def recipe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -225,9 +226,9 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
     return ConversationHandler.END
 
 
-def preprocess_user_input(ingredients_input: str) -> List[str]:
-    result_list = ingredients_input.split(", ")
-    if len(result_list) <= 1:
+def preprocess_user_input(ingredients_input: str | List[str]) -> List[str]:
+    result_list = ingredients_input.split(", ") if isinstance(ingredients_input, str) else ingredients_input
+    if len(result_list) == 1 and result_list[0] == "no":
         raise ValueError("Please, enter several ingredients divided by coma.")
     return result_list
 
@@ -261,6 +262,16 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def process_photo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] = SINGLE_INGREDIENT_ON_PHOTO
+    await update.message.reply_text(
+        TELEGRAM_PHOTO_START_CONVERSATION,
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return PHOTO_2_INGREDIENTS
+
+
+async def process_mult_ingredients_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] = MULTIPLE_INGREDIENTS_ON_PHOTO
     await update.message.reply_text(
         TELEGRAM_PHOTO_START_CONVERSATION,
         reply_markup=ReplyKeyboardRemove()
@@ -273,8 +284,13 @@ async def photo2ingredients_command(update: Update, context: ContextTypes.DEFAUL
     file_id = update.message.photo[-1].file_id
     img_file = await context.bot.get_file(file_id)
     image_data = await img_file.download_as_bytearray()
+    request = FAST_API_RECOMMENDER_URL
+    if INGREDIENTS_RECOGNITION_ON_PHOTO in context.user_data:
+        request += '/photo2multiple_ingredients' if context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] == MULTIPLE_INGREDIENTS_ON_PHOTO else '/photo2ingredients'
+        context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] = None
+    else:
+        request += '/photo2ingredients'
 
-    request = FAST_API_RECOMMENDER_URL + '/photo2ingredients'
     files = [
         ("image", (f"{user_id}_{file_id}.jpg", image_data, "image/jpg"))
     ]
@@ -283,11 +299,10 @@ async def photo2ingredients_command(update: Update, context: ContextTypes.DEFAUL
         reply_markup=ReplyKeyboardRemove()
     )
     response = requests.post(request, files=files)
-    context.user_data[INGREDIENTS_FIELD] = response.text
+    context.user_data[INGREDIENTS_FIELD] = ast.literal_eval(response.text)
     result_response = ', '.join(ast.literal_eval(response.text))
     if result_response:
-        bot_response = f'I found {result_response} on the photo. Is it correct? \n\n '
-        f'Please, confirm or type the ingredients.'
+        bot_response = f'I found {result_response} on the photo. Is it correct? Please, confirm or type the ingredients.'
     else:
         bot_response = 'I am sorry, I could not find any ingredient on the photo. If you want to find recipes, ' \
                        'please enter the ingredients.'
@@ -302,11 +317,6 @@ async def general_recipe_recommender_command(update: Update, context: ContextTyp
     user_response = update.message.text
     if user_response.lower() != 'yes':
         context.user_data[INGREDIENTS_FIELD] = user_response
-
-    await update.message.reply_text(
-        "The request is in process. Please, wait.",
-        reply_markup=ReplyKeyboardRemove()
-    )
     request = FAST_API_RECOMMENDER_URL + "/recipe/" + D2V_RECOMMENDATION_OPTION
     try:
         ingredients_input = preprocess_user_input(context.user_data[INGREDIENTS_FIELD])
@@ -317,9 +327,8 @@ async def general_recipe_recommender_command(update: Update, context: ContextTyp
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-    print(context.user_data[USER_INPUT_CATEGORY])
-    print(USER_INPUT_CATEGORY in context.user_data)
     if USER_INPUT_CATEGORY in context.user_data:
+        request += "/category"
         params = {
             USER_INPUT_CATEGORY: context.user_data[USER_INPUT_CATEGORY],
             'user_input': ingredients_input
@@ -405,7 +414,8 @@ if __name__ == '__main__':
     # photo2ingredients
     conv_handler = ConversationHandler(
         entry_points=[
-            CommandHandler('process_photo', process_photo_command)
+            CommandHandler('process_mult_ingredients_photo', process_mult_ingredients_command),
+            CommandHandler('process_single_ingredient_photo', process_photo_command)
         ],
         states={
             PHOTO_2_INGREDIENTS: [MessageHandler(filters.PHOTO, photo2ingredients_command)],
@@ -421,7 +431,7 @@ if __name__ == '__main__':
             CommandHandler('advice', advice_command)
         ],
         states={
-            CHOOSE_CATEGORY: [MessageHandler(filters.PHOTO, choose_category_command)],
+            CHOOSE_CATEGORY: [MessageHandler(filters.TEXT, choose_category_command)],
             PHOTO_RECIPE_RECOMMENDER: [MessageHandler(filters.TEXT, general_recipe_recommender_command)]
         },
         fallbacks=[CommandHandler('cancel', cancel_command)],

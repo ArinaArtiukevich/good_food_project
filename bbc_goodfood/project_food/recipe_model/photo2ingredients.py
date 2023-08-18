@@ -11,8 +11,9 @@ from tensorflow.keras.preprocessing import image
 import sys
 
 sys.path.append("..")
-from configs.constants import MOBILENET_V5_MODEL, IMG_SIZE, SLIDED_IMAGES_PATH, SLIDED_IMAGES_FOLDER, TABLE_CLASS, \
-    AVAILABLE_INGREDIENT_NAMES, TABLE_INDEX
+from configs.constants import MOBILENET_V5_MODEL, IMG_SIZE, SLIDED_IMAGES_PATH, SLIDED_IMAGES_FOLDER, \
+    AVAILABLE_INGREDIENT_NAMES\
+    # , TABLE_INDEX, TABLE_CLASS
 
 
 class Photo2Ingredients:

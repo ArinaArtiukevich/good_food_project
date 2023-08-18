@@ -395,8 +395,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    print(BOT_TOKEN)
-    app = Application.builder().token(token='6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0').build()
+    app = Application.builder().token(token=BOT_TOKEN).build()
 
     # Commands
     app.add_handler(CommandHandler('start', start_command))

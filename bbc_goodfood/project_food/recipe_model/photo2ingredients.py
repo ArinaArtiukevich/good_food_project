@@ -24,7 +24,7 @@ class Photo2Ingredients:
         image_array = image.img_to_array(image_resized)
         img_array = np.array([image_array])
         prediction = self.model.predict(img_array)
-        prediction[0][TABLE_INDEX] = float('-inf')
+        # prediction[0][TABLE_INDEX] = float('-inf')
         predicted_index = np.argmax(prediction)
         predicted_class_name = AVAILABLE_INGREDIENT_NAMES[predicted_index]
         return [predicted_class_name]
@@ -99,8 +99,8 @@ class Photo2MultipleIngredients:
                 ingredients_list.append(ingredient)
             else:
                 break
-        if TABLE_CLASS in ingredients_list:
-            ingredients_list.remove(TABLE_CLASS)
+        # if TABLE_CLASS in ingredients_list:
+        #     ingredients_list.remove(TABLE_CLASS)
         print(ingredients_list)
         return ingredients_list
 

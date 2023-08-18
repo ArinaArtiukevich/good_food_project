@@ -19,4 +19,7 @@ services:
       - telegram/configs/.env
 #      - todo del
 #      - 'CHATBOT_HOST=chatbot'
-#      - 'CHATBOT_PORT=8666'
+      - 'BOT_TOKEN=6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0'
+      - 'BOT_USERNAME=@recipe_recommender_bot'
+      - 'FAST_API_RECOMMENDER_URL=http://telegram:8000'
+      - 'FAST_API_TELEGRAM_URL=http://project_food:2000'

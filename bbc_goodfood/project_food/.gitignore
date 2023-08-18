@@ -1,2 +1,4 @@
 **/*.env
 GroceryStoreDataset/
+.DS_Store
+*.DS_Store

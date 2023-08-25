@@ -5,6 +5,7 @@ import sys
 import pandas as pd
 import requests
 
+from dotenv import load_dotenv
 from typing import List
 from starlette import status
 from telegram import Update, ReplyKeyboardRemove, ReplyKeyboardMarkup
@@ -12,7 +13,7 @@ from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandl
 import sys
 
 sys.path.append("..")
-from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
+# from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
 from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET, TELEGRAM_PHOTO_START_CONVERSATION, INGREDIENTS_FIELD, \
@@ -20,10 +21,14 @@ from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     GENERAL_INGREDIENTS_QUESTION, USER_INPUT_CATEGORY, MULTIPLE_INGREDIENTS_ON_PHOTO, SINGLE_INGREDIENT_ON_PHOTO, \
     INGREDIENTS_RECOGNITION_ON_PHOTO
 
-# BOT_TOKEN = os.getenv('BOT_TOKEN')
-# BOT_USERNAME = os.getenv('BOT_USERNAME')
-# FAST_API_RECOMMENDER_URL = os.getenv('FAST_API_RECOMMENDER_URL')
-# FAST_API_TELEGRAM_URL = os.getenv('FAST_API_TELEGRAM_URL')
+# env_path = os.path.join(os.path.dirname(__file__), '.env')
+# load_dotenv(env_path)
+
+load_dotenv()
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+BOT_USERNAME = os.getenv('BOT_USERNAME')
+FAST_API_RECOMMENDER_URL = os.getenv('FAST_API_RECOMMENDER_URL')
+FAST_API_TELEGRAM_URL = os.getenv('FAST_API_TELEGRAM_URL')
 
 RECIPE_RECOMMENDER = 0
 PHOTO_2_INGREDIENTS = 1
@@ -410,6 +415,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
+    print(os.environ['BOT_TOKEN'])
+    print(BOT_TOKEN)
     app = Application.builder().token(token=BOT_TOKEN).build()
 
     # Commands

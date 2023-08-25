@@ -1,8 +1,3 @@
-TF_IDF_MODEL = '/project_food/data/tf_idf/tf_idf_model.pickle'
-DATA_PARSED_PATH_CSV = r'/project_food/data/csv_dataframe/data_goodfood_bbc_parsed.csv'
-WORD2VEC_MODEL_MEAN = '/project_food/data/word2vec/word2vec_mean.pickle'
-WORD2VEC_MODEL_TF_IDF = '/project_food/data/word2vec/word2vec_tf_idf.pickle'
-
 TELEGRAM_CANCEL_COMMAND = "Enter command /cancel to stop the conversation."
 GENERAL_INGREDIENTS_QUESTION = "Please, tell me what ingredients you have."
 TELEGRAM_PHOTO_START_CONVERSATION = "Please, add photo, so that i process it.\n" + TELEGRAM_CANCEL_COMMAND

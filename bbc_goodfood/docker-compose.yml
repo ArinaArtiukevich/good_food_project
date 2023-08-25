@@ -16,9 +16,8 @@ services:
       - '4000:4000'
     restart: unless-stopped
     environment:
-      - telegram/configs/.env
+#      - telegram/configs/.env
 #      - todo del
-#      - 'CHATBOT_HOST=chatbot'
       - 'BOT_TOKEN=6421904425:AAH22gBs6bGYVZ2XekeO5yqmReXkJMyS3n0'
       - 'BOT_USERNAME=@recipe_recommender_bot'
       - 'FAST_API_RECOMMENDER_URL=http://project_food:8000'

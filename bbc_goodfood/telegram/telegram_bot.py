@@ -12,7 +12,7 @@ from telegram.ext import ContextTypes, Application, CommandHandler, MessageHandl
 import sys
 
 sys.path.append("..")
-# from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
+from configs.dev import BOT_TOKEN, FAST_API_RECOMMENDER_URL
 from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     TF_IDF_RECOMMENDATION_OPTION, W2V_MEAN_RECOMMENDATION_OPTION, W2V_TF_IDF_RECOMMENDATION_OPTION, \
     TELEGRAM_USER_EXAMPLE_VEGETABLE, TELEGRAM_USER_EXAMPLE_SWEET, TELEGRAM_PHOTO_START_CONVERSATION, INGREDIENTS_FIELD, \
@@ -20,10 +20,10 @@ from configs.constants import TELEGRAM_INPUT, DEFAULT_RECOMMENDATION_OPTION, \
     GENERAL_INGREDIENTS_QUESTION, USER_INPUT_CATEGORY, MULTIPLE_INGREDIENTS_ON_PHOTO, SINGLE_INGREDIENT_ON_PHOTO, \
     INGREDIENTS_RECOGNITION_ON_PHOTO
 
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-BOT_USERNAME = os.getenv('BOT_USERNAME')
-FAST_API_RECOMMENDER_URL = os.getenv('FAST_API_RECOMMENDER_URL')
-FAST_API_TELEGRAM_URL = os.getenv('FAST_API_TELEGRAM_URL')
+# BOT_TOKEN = os.getenv('BOT_TOKEN')
+# BOT_USERNAME = os.getenv('BOT_USERNAME')
+# FAST_API_RECOMMENDER_URL = os.getenv('FAST_API_RECOMMENDER_URL')
+# FAST_API_TELEGRAM_URL = os.getenv('FAST_API_TELEGRAM_URL')
 
 RECIPE_RECOMMENDER = 0
 PHOTO_2_INGREDIENTS = 1
@@ -186,11 +186,11 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
         reply_markup=ReplyKeyboardRemove()
     )
     request = FAST_API_RECOMMENDER_URL + "/recipe/"
-    if context.user_data[DEFAULT_RECOMMENDATION_OPTION] or context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION]:
+    if context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION]:
         request = request + W2V_TF_IDF_RECOMMENDATION_OPTION
         context.user_data[DEFAULT_RECOMMENDATION_OPTION] = 0
         context.user_data[W2V_TF_IDF_RECOMMENDATION_OPTION] = 0
-    elif context.user_data[TF_IDF_RECOMMENDATION_OPTION]:
+    elif context.user_data[DEFAULT_RECOMMENDATION_OPTION] or context.user_data[TF_IDF_RECOMMENDATION_OPTION]:
         request = request + TF_IDF_RECOMMENDATION_OPTION
         context.user_data[TF_IDF_RECOMMENDATION_OPTION] = 0
     elif context.user_data[W2V_MEAN_RECOMMENDATION_OPTION]:
@@ -227,9 +227,7 @@ async def recipe_recommender_command(update: Update, context: ContextTypes.DEFAU
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-    await update.message.reply_text(
-        result_output
-    )
+    await print_user_output(result_output, update)
     return ConversationHandler.END
 
 
@@ -240,18 +238,24 @@ def preprocess_user_input(ingredients_input: str | List[str]) -> List[str]:
     return result_list
 
 
-def get_output(input_dict: dict) -> str:
+def get_output(input_dict: dict) -> List:
     list_input_keys = list(input_dict.keys())
     parsed_name_ingredients = parse_name_ingredients(list_input_keys)
-    initial_output = "Based on the ingredients we recommend you to choose from: \n\n"
-    result = "".join(name + ingredients + '\n' for (name, ingredients) in parsed_name_ingredients)
-    end_output = "\n\n Please, visit https://www.bbcgoodfood.com/ to see more details."
-    return initial_output + result + end_output
+    result = [name + ingredients + instructions + '\n' for name, ingredients, instructions in parsed_name_ingredients]
+    return result
 
 
-def parse_name_ingredients(input_result: List[str]) -> list[tuple[str, str]]:
+def parse_name_ingredients(input_result: List[str]) -> list[tuple[str, str, str]]:
     list_name_ingredients = [ast.literal_eval(value) for value in input_result]
-    return [(name, prettify_output(ingredients)) for (name, ingredients) in list_name_ingredients]
+    return [(name, prettify_output(ingredients), prettify_output_instructions(instructions)) for
+            name, ingredients, instructions in
+            list_name_ingredients]
+
+
+def prettify_output_instructions(input_string: str) -> str:
+    instructions_list = ast.literal_eval(input_string)
+    instructions_string = '\n'.join(f'{i+1}. {instruction}' for i, instruction in enumerate(instructions_list))
+    return '\n' + instructions_string + '\n'
 
 
 def prettify_output(input_string: str) -> str:
@@ -293,7 +297,8 @@ async def photo2ingredients_command(update: Update, context: ContextTypes.DEFAUL
     image_data = await img_file.download_as_bytearray()
     request = FAST_API_RECOMMENDER_URL
     if INGREDIENTS_RECOGNITION_ON_PHOTO in context.user_data:
-        request += '/photo2multiple_ingredients' if context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] == MULTIPLE_INGREDIENTS_ON_PHOTO else '/photo2ingredients'
+        request += '/photo2multiple_ingredients' if context.user_data[
+                                                        INGREDIENTS_RECOGNITION_ON_PHOTO] == MULTIPLE_INGREDIENTS_ON_PHOTO else '/photo2ingredients'
         context.user_data[INGREDIENTS_RECOGNITION_ON_PHOTO] = None
     else:
         request += '/photo2ingredients'
@@ -324,7 +329,7 @@ async def general_recipe_recommender_command(update: Update, context: ContextTyp
     user_response = update.message.text
     if user_response.lower() != 'yes':
         context.user_data[INGREDIENTS_FIELD] = user_response
-    request = FAST_API_RECOMMENDER_URL + "/recipe/" + D2V_RECOMMENDATION_OPTION
+    request = FAST_API_RECOMMENDER_URL + "/recipe/" + TF_IDF_RECOMMENDATION_OPTION
     try:
         ingredients_input = preprocess_user_input(context.user_data[INGREDIENTS_FIELD])
         context.user_data[INGREDIENTS_FIELD] = None
@@ -356,17 +361,28 @@ async def general_recipe_recommender_command(update: Update, context: ContextTyp
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-    await update.message.reply_text(
-        result_output
-    )
+    await print_user_output(result_output, update)
     return ConversationHandler.END
+
+
+async def print_user_output(result_output, update):
+    await update.message.reply_text(
+        "Based on the ingredients we recommend you to choose from: \n\n"
+    )
+    for output_message in result_output:
+        await update.message.reply_text(
+            output_message
+        )
+    await update.message.reply_text(
+        "\n\n Please, visit https://www.bbcgoodfood.com/ to see more details."
+    )
 
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error {context.error}')
 
 
-def handle_response(text: str) -> str:
+async def handle_response(update: Update, text: str) -> str:
     try:
         ingredients_input = preprocess_user_input(text)
     except ValueError as err:
@@ -375,13 +391,13 @@ def handle_response(text: str) -> str:
     params = {
         'user_input': ingredients_input
     }
-    response = requests.get(FAST_API_RECOMMENDER_URL + '/recipe/' + W2V_TF_IDF_RECOMMENDATION_OPTION, params)
+    response = requests.get(FAST_API_RECOMMENDER_URL + '/recipe/' + D2V_RECOMMENDATION_OPTION, params)
     json_response = json.loads(response.content)
     try:
         result_output = get_output(json_response)
     except json.JSONDecodeError:
         return "Server error. Please, try again later."
-    return result_output
+    await print_user_output(result_output, update)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -390,8 +406,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
 
-    response = handle_response(text)
-    await update.message.reply_text(response)
+    await handle_response(update, text)
 
 
 if __name__ == '__main__':

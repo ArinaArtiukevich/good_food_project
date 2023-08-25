@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 sys.path.append("..")
 from configs.constants import INGREDIENTS_PARSED_COLUMN, DOC2VEC_MODEL, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
-    NAME_COLUMN, TYPES_COLUMN
+    NAME_COLUMN, TYPES_COLUMN, INSTRUCTIONS_COLUMN
 from recipe_model.basic_model import BasicModel
 from data_preprocessing.preprocessing import DataPreprocessing
 from data.schema.recommendation_models import NamedDoc2Vec
@@ -47,7 +47,6 @@ class CustomDoc2Vec(BasicModel):
             ids = [row_id[0] for row_id in best_recipes]
             selected_rows = self.df.iloc[ids]
         else:
-            print("2")
             best_recipes = self.d2v_model.dv.most_similar([embeddings], topn=200)
             doc_indices = [int(doc_idx) for doc_idx, _ in best_recipes]
             new_df = self.df.loc[doc_indices].copy()
@@ -55,8 +54,7 @@ class CustomDoc2Vec(BasicModel):
                 lambda lst_str: ast.literal_eval(lst_str) if isinstance(lst_str, str) else lst_str)
             boolean_series = new_df[TYPES_COLUMN].apply(lambda lst: category in lst if isinstance(lst, list) else False)
             selected_rows = new_df[boolean_series]
-        print(selected_rows)
-        selected_columns = [NAME_COLUMN, INGREDIENTS_COLUMN]
+        selected_columns = [NAME_COLUMN, INGREDIENTS_COLUMN, INSTRUCTIONS_COLUMN]
         selected_list = [selected_rows[column] for column in selected_columns]
         return pd.concat(selected_list, axis=1)
 
@@ -80,8 +78,8 @@ class CustomDoc2Vec(BasicModel):
 if __name__ == "__main__":
     model = CustomDoc2Vec.create_instance().train_model()
     user_inp = "['cinnamon', 'sugar', 'apple', 'flour', 'butter']"
-    # rec = model.get_recommendations(user_inp)
-    # print(rec)
+    rec = model.get_recommendations(user_inp)
+    print(rec)
 
     model.to_pickle(DOC2VEC_MODEL)
     model = CustomDoc2Vec.from_pickle(DOC2VEC_MODEL)

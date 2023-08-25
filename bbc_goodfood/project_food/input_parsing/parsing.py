@@ -1,6 +1,5 @@
 import json
 import math
-import time
 import joblib
 from typing import List
 
@@ -14,6 +13,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import sys
+
 sys.path.append("..")
 from configs.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
 from data.schema.recipe import ExtendedRecipeModel
@@ -33,29 +33,25 @@ class BBCRecipesParses(RecipeParser):
     PAGE_PARAM = "&page="
 
     def __init__(self, driver: webdriver = None):
-        self.driver = driver if driver is not None else webdriver.Chrome(service=Service(ChromeDriverManager(version="114.0.5735.90").install()))
+        self.driver = driver if driver is not None else webdriver.Chrome(
+            service=Service(ChromeDriverManager(version="114.0.5735.90").install()))
 
     def parse_recipes(self, url: str = URL, return_dataframe: bool = True) -> List[ExtendedRecipeModel] | pd.DataFrame:
         input_recipes = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []
         pages = math.ceil(self.EXPECTED_NUMBER_OF_RECIPIES / 30)
         print(pages)
-        for page in range(29, pages):
+        for page in range(1, pages):
             current_url = url + self.PAGE_PARAM + str(page)
             print(current_url)
             temp = self.generate_dataset(url=current_url, return_dataframe=return_dataframe)
             input_recipes = input_recipes.append(temp) if return_dataframe else input_recipes + temp
-            # todo del
-            # joblib.dump(input_recipes, DATA_PATH_FULL_PICKLE)
-            df = pd.DataFrame(input_recipes)
-            df.to_csv(
-                '/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/expanded_csv_dataframe/expanded_bbc_good_food_dataframe.csv',
-                sep="\t", index=False)
 
         self.driver.close()
         self.driver.quit()
         return input_recipes
 
-    def generate_dataset(self, url: str, basic_url: str = BASIC_URL, return_dataframe: bool = True) -> List[ExtendedRecipeModel] | pd.DataFrame:
+    def generate_dataset(self, url: str, basic_url: str = BASIC_URL, return_dataframe: bool = True) -> List[
+                                                                                                           ExtendedRecipeModel] | pd.DataFrame:
         result = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []
         articles = self.get_all_articles(url)
         print(len(articles))
@@ -68,28 +64,26 @@ class BBCRecipesParses(RecipeParser):
                     recipe_request = requests.get(basic_url + recipe_url)
                     break
                 except requests.exceptions.ConnectionError:
-                    # TODO
-                    print("exc")
+                    print(f"Could not get {basic_url + recipe_url}")
                     continue
             recipe_parser = bs4.BeautifulSoup(recipe_request.text, features="html.parser")
             try:
                 parsed_recipe = self.get_recipes_from_page(recipe_parser, recipe_title)
                 if return_dataframe:
                     result.loc[len(result)] = [
-                       parsed_recipe.cuisine,
-                       parsed_recipe.types,
-                       parsed_recipe.name,
-                       parsed_recipe.ingredients,
-                       parsed_recipe.difficulty,
-                       parsed_recipe.health_banners,
-                       parsed_recipe.instructions,
-                       parsed_recipe.link
+                        parsed_recipe.cuisine,
+                        parsed_recipe.types,
+                        parsed_recipe.name,
+                        parsed_recipe.ingredients,
+                        parsed_recipe.difficulty,
+                        parsed_recipe.health_banners,
+                        parsed_recipe.instructions,
+                        parsed_recipe.link
                     ]
                 else:
                     result.append(parsed_recipe)
             except:
-                # TODO
-                print("find_all None error thing. Ignore this page")
+                print("Could not find an item during scrapping. Ignore this page")
         return result
 
     def get_recipes_from_page(self, recipe_parser: bs4.BeautifulSoup, recipe_title: str) -> ExtendedRecipeModel:
@@ -136,8 +130,7 @@ class BBCRecipesParses(RecipeParser):
             for instruction in range(len(instructions_soup)):
                 instructions.append(instructions_soup[instruction].getText())
         except AttributeError:
-            # TODO find_all - nothing
-            ...
+            print("Could not find an item during scrapping. Ignore this page")
         return instructions
 
     def get_ingredients(self, ingredients_space: bs4.Tag):
@@ -148,8 +141,7 @@ class BBCRecipesParses(RecipeParser):
             for ingredient in range(len(ingredients_soup)):
                 ingredients.append(ingredients_soup[ingredient].getText())
         except AttributeError:
-            # TODO find_all - nothing
-            ...
+            print("Could not find an item during scrapping. Ignore this page")
         return ingredients
 
     def get_health_banners(self, health_banners_space: bs4.Tag):
@@ -159,9 +151,7 @@ class BBCRecipesParses(RecipeParser):
             for health_banner in range(len(health_banners_soup)):
                 health_banners.append(health_banners_soup[health_banner].getText())
         except AttributeError:
-            # TODO find_all - nothing
-            ...
-
+            print("Could not find an item during scrapping. Ignore this page")
         return health_banners
 
 

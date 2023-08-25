@@ -1,6 +1,5 @@
 import ast
 import re
-# todo delete SnowballStemmer - более "сильный"
 import joblib
 import nltk
 import pandas as pd
@@ -8,7 +7,7 @@ from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from typing import List
 import sys
 sys.path.append("..")
-from configs.constants import DATA_PATH_SHORT_CSV, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
+from configs.constants import DATA_PATH_FULL_CSV, DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, \
     INGREDIENTS_PARSED_COLUMN, DROP_DUPLICATES_BY_COLUMN, DATA_PARSED_PATH_PICKLE
 from data.schema.recipe import ExtendedRecipeModel, RecipeParsedModel
 
@@ -17,8 +16,7 @@ class DataPreprocessing:
     MEASURES = ['cup', 'tsp', 'tbsp', 'c', 'fl oz', 'pt', 'qt', 'gal', 'g', 'kg', 'mg', 'oz', 'lb', 'slice', 'piece',
                 'pinch', 'dash', 'whole', 'dozen', 'count', 'pkg', 'can', 'jar', 'carton', 'stick', 'drop', 'cm', 'm',
                 'ml', 'l', 'x', 'pint', 'cubes', 'cube', 'pack', '%', 'packet', 'pack', 'can', 'pod', 'slice', 'sliced', 'tubs', 'tub', 'tin', 'tins']
-    # STOP_WORDS = ['a', 'an', 'the', 'in', 'on', 'at', 'for', 'of', 'with', 'to', 'from', 'by', 'as', 'is', 'are',
-    # 'was', 'were', 'has', 'have', 'had', 'need']
+
     STOP_WORDS = set(nltk.corpus.stopwords.words('english') + ['new', 'per'])
     PREPROCESSED_STOP_WORDS = [
         'grey', 'white', 'one',
@@ -32,7 +30,7 @@ class DataPreprocessing:
         'want', 'wash', 'whatev', 'winter', 'work', 'write', 'young'
         'larg', 'hand', 'fine', 'chop', 'serv', 'lengthway', 'larg', 'thick',
         'rough', 'piec', 'peel', 'cube', 'thigh', 'bite', 'size', 'plus', 'extra',
-        'greas', 'natur', 'crush', 'leaf', 'left', 'temperatur', 'skin'
+        'greas', 'natur', 'crush', 'leaf', 'left', 'temperatur', 'skin', 'roughi'
     ]
     ingredient_replacements = {
         'crème': 'creme', 'chilli': 'chili',
@@ -98,10 +96,6 @@ class DataPreprocessing:
         # create list from string
         df_copy[INGREDIENTS_PARSED_COLUMN] = df_copy[INGREDIENTS_PARSED_COLUMN].apply(ast.literal_eval).tolist()
 
-        # TODO DEL
-        # df_copy[INGREDIENTS_COLUMN] = df_copy[INGREDIENTS_COLUMN].apply(lambda ingredients_string: ingredients_string.translate(str.maketrans({"\'": '\"', '\"': "\'"})))
-        # df_copy[INGREDIENTS_COLUMN] = df_copy[INGREDIENTS_COLUMN].apply(lambda ingredients_string: json.loads(str(ingredients_string)))
-
         # remove comas and multiple spaces
         df_copy[INGREDIENTS_PARSED_COLUMN] = df_copy[INGREDIENTS_PARSED_COLUMN].apply(
             lambda ingredients: [self.preprocess_ingredient(ingredient) for ingredient in ingredients])
@@ -160,7 +154,7 @@ class DataPreprocessing:
 
 if __name__ == "__main__":
     # # CSV
-    df = pd.read_csv(DATA_PATH_SHORT_CSV, sep='\t')
+    df = pd.read_csv(DATA_PATH_FULL_CSV, sep='\t')
     recipe_df = df.copy()
     print(recipe_df.shape)
     # recipe_df.sort_values(DROP_DUPLICATES_BY_COLUMN, inplace=True)
@@ -173,7 +167,7 @@ if __name__ == "__main__":
     dt_preprocessed.to_csv(DATA_PARSED_PATH_CSV, sep="\t", index=False)
 
     # PICKLE
-    df = pd.read_csv(DATA_PATH_SHORT_CSV, sep='\t')
+    df = pd.read_csv(DATA_PATH_FULL_CSV, sep='\t')
     recipe_df = df.copy()
     recipes_list = list(recipe_df.itertuples(name='ExtendedRecipeModel', index=False))
     unique_recipes_list = list(set(recipes_list))

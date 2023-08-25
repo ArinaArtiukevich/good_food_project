@@ -7,8 +7,10 @@ from Levenshtein import distance
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import sys
+
 sys.path.append("..")
-from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL, NAME_COLUMN
+from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL, \
+    NAME_COLUMN, INSTRUCTIONS_COLUMN
 from data.schema.recommendation_models import FittedTfIdfModel
 from data_preprocessing.preprocessing import DataPreprocessing
 from recipe_model.basic_model import BasicModel
@@ -54,13 +56,10 @@ class TF_IDF_RecipeRecommendation(BasicModel):
         preprocessed_input = pd.Series([(DataPreprocessing().preprocess_request(user_input))]).astype(str)
         input_cv = self.cv.transform(preprocessed_input)
         input_tfidf = self.tfidf.transform(input_cv)
-        # todo
-        # dense_input = input_tfidf.todense()
-        # dense_model = self.tfidf_ingredients.todense()
-
         return pd.Series(
             np.array(list((map(lambda x: cosine_similarity(input_tfidf, x), self.tfidf_matrix)))).ravel(),
-            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN]]).sort_values(ascending=False).head(5)
+            index=[self.df[NAME_COLUMN], self.df[INGREDIENTS_COLUMN], self.df[INSTRUCTIONS_COLUMN]]).sort_values(
+            ascending=False).head(5)
 
     def to_pickle(self, path: str = TF_IDF_MODEL):
         items = FittedTfIdfModel(
@@ -80,23 +79,7 @@ class TF_IDF_RecipeRecommendation(BasicModel):
 
 if __name__ == "__main__":
     tf_idf = TF_IDF_RecipeRecommendation.create_instance(from_csv=True, path=DATA_PARSED_PATH_CSV).prepare_model()
+    tf_idf.to_pickle()
     # tf_idf = TF_IDF_RecipeRecommendation.create_instance(from_csv=False, path=DATA_PARSED_PATH_PICKLE).prepare_model()
     rec = tf_idf.get_recommendations("['cinnamon', 'sugar', 'apple', 'flour', 'butter']")
     print(rec)
-
-    # todo del
-    # pth = "/Users/arina/study/ds/project/food_recommendation/bbc_goodfood/project_food/data/csv_dataframe/data_goodfood_bbc_delete.csv"
-    # df = pd.read_csv(DATA_PARSED_PATH_CSV, sep='\t')
-    # df['ingredients_parsed'] = df['ingredients_parsed'].apply(eval)
-    # df['ingredients'] = df['ingredients'].apply(eval)
-    #
-    # mlb = MultiLabelBinarizer().fit(df['ingredients_parsed'])
-    # print(mlb.classes_.shape)
-    #
-    # print(pd.DataFrame(mlb.transform(df['ingredients_parsed']), index=df.index, columns=mlb.classes_))
-    # sparse_mtr = pd.DataFrame(mlb.transform(df['ingredients_parsed']), index=df.index, columns=mlb.classes_)
-    #
-    # sparse_mtr.to_csv(pth, sep="\t", index=False)
-    #
-    # print(sparse_mtr.sum().sort_values(ascending=False).head(50))
-    # # sparse_mtr.sum().sort_values(ascending=False).plot(kind="bar", figsize=(10, 5))

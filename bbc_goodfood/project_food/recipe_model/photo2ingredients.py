@@ -12,8 +12,7 @@ import sys
 
 sys.path.append("..")
 from configs.constants import MOBILENET_V5_MODEL, IMG_SIZE, SLIDED_IMAGES_PATH, SLIDED_IMAGES_FOLDER, \
-    AVAILABLE_INGREDIENT_NAMES\
-    # , TABLE_INDEX, TABLE_CLASS
+    AVAILABLE_INGREDIENT_NAMES
 
 
 class Photo2Ingredients:
@@ -24,10 +23,12 @@ class Photo2Ingredients:
         image_resized = image_file.resize((IMG_SIZE, IMG_SIZE))
         image_array = image.img_to_array(image_resized)
         img_array = np.array([image_array])
-        prediction = self.model.predict(img_array)
-        # prediction[0][TABLE_INDEX] = float('-inf')
+        rescaled_img_array = img_array / 255.0
+        prediction = self.model.predict(rescaled_img_array)
+        # prediction[0][43] = float('-inf')
         predicted_index = np.argmax(prediction)
         predicted_class_name = AVAILABLE_INGREDIENT_NAMES[predicted_index]
+        print(predicted_class_name, np.max(prediction))
         return [predicted_class_name]
 
 
@@ -37,7 +38,8 @@ class Photo2MultipleIngredients:
         self.img_path = img_path
 
     def get_absolute_img_path(self, image_file: Image) -> str:
-        existing_files = [file for file in os.listdir(self.img_path) if os.path.isfile(os.path.join(self.img_path, file))]
+        existing_files = [file for file in os.listdir(self.img_path) if
+                          os.path.isfile(os.path.join(self.img_path, file))]
         image_files = [file for file in existing_files if file.lower().endswith(".jpg")]
         if image_files:
             last_image_number = max([int(file.split("_")[1].split(".")[0]) for file in image_files])
@@ -80,8 +82,8 @@ class Photo2MultipleIngredients:
             print(type(img))
             img_array = image.img_to_array(img)
             img_array = np.array([img_array])
-
-            prediction = self.model.predict(img_array)
+            rescaled_img_array = img_array / 255.0
+            prediction = self.model.predict(rescaled_img_array)
 
             predicted_index = np.argmax(prediction)
             predicted_class_name = AVAILABLE_INGREDIENT_NAMES[predicted_index]
@@ -100,21 +102,19 @@ class Photo2MultipleIngredients:
                 ingredients_list.append(ingredient)
             else:
                 break
-        # if TABLE_CLASS in ingredients_list:
-        #     ingredients_list.remove(TABLE_CLASS)
-        print(ingredients_list)
+        print(mean_ingredients.items())
         return ingredients_list
 
     def predict_ingredients(self, image_file: Image) -> List[str]:
         ingredients = self.predict_all_ingredients(self.slide_image_window(image_file))
         counted_ingredients = self.mean_predicted_ingredients(ingredients)
-        result_ingredients = self.ingredients_list(0.6, counted_ingredients)
+        result_ingredients = self.ingredients_list(0.7, counted_ingredients)
         return result_ingredients
 
 
 if __name__ == "__main__":
     p2ingr = Photo2Ingredients()
-    img_path = '/Users/arina/study/ds/project/food_recommendation/photo2ingredients_data/grocery_store/custom_images/table.jpg'
+    # todo enter test image
+    img_path = '../data/photo2ingredients/test_images/cucumber.jpeg'
     img = image.load_img(img_path)
-    print(p2ingr.get_ingredients(img))
-
+    print(p2ingr.predict_ingredients(img))

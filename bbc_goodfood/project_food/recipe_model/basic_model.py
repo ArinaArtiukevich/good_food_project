@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 import sys
+
 sys.path.append("..")
 from configs.constants import DATA_PARSED_PATH_CSV, DATA_PARSED_PATH_PICKLE, LIST_PARAMS_PARSED_MODEL
 

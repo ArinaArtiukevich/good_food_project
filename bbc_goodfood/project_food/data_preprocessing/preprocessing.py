@@ -19,7 +19,7 @@ class DataPreprocessing:
 
     STOP_WORDS = set(nltk.corpus.stopwords.words('english') + ['new', 'per'])
     PREPROCESSED_STOP_WORDS = [
-        'grey', 'white', 'one',
+        'grey', 'one',
         'two', 'three', 'four', 'five',
         'middl', 'around', 'hot', 'high',
         'big', 'irregular', 'regular',

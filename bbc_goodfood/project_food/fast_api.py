@@ -1,11 +1,10 @@
+import sys
 from io import BytesIO
 from typing import List
 
 import joblib
 import pandas as pd
 import uvicorn
-import sys
-
 from PIL import Image
 
 sys.path.append("..")

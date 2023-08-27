@@ -15,10 +15,3 @@ services:
     ports:
       - '4000:4000'
     restart: unless-stopped
-#    environment:
-#      - /app/configs/.env
-#      - todo del
-#
-#      - 'BOT_USERNAME=@recipe_recommender_bot'
-#      - 'FAST_API_RECOMMENDER_URL=http://project_food:8000'
-#      - 'FAST_API_TELEGRAM_URL=http://telegram:4000'

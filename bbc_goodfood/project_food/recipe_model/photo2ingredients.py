@@ -1,14 +1,12 @@
 import os
+import sys
 from collections import defaultdict
 from typing import List, Dict
 
 import keras
 import numpy as np
-
 from PIL.Image import Image
 from tensorflow.keras.preprocessing import image
-
-import sys
 
 sys.path.append("..")
 from configs.constants import MOBILENET_V5_MODEL, IMG_SIZE, SLIDED_IMAGES_PATH, SLIDED_IMAGES_FOLDER, \
@@ -25,7 +23,6 @@ class Photo2Ingredients:
         img_array = np.array([image_array])
         rescaled_img_array = img_array / 255.0
         prediction = self.model.predict(rescaled_img_array)
-        # prediction[0][43] = float('-inf')
         predicted_index = np.argmax(prediction)
         predicted_class_name = AVAILABLE_INGREDIENT_NAMES[predicted_index]
         print(predicted_class_name, np.max(prediction))
@@ -79,7 +76,6 @@ class Photo2MultipleIngredients:
         ingredients = defaultdict(list)
         for cropped_path in slided_paths:
             img = image.load_img(cropped_path, target_size=(224, 224))
-            print(type(img))
             img_array = image.img_to_array(img)
             img_array = np.array([img_array])
             rescaled_img_array = img_array / 255.0
@@ -102,7 +98,6 @@ class Photo2MultipleIngredients:
                 ingredients_list.append(ingredient)
             else:
                 break
-        print(mean_ingredients.items())
         return ingredients_list
 
     def predict_ingredients(self, image_file: Image) -> List[str]:
@@ -114,7 +109,6 @@ class Photo2MultipleIngredients:
 
 if __name__ == "__main__":
     p2ingr = Photo2Ingredients()
-    # todo enter test image
     img_path = '../data/photo2ingredients/test_images/cucumber.jpeg'
     img = image.load_img(img_path)
     print(p2ingr.predict_ingredients(img))

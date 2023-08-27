@@ -1,21 +1,20 @@
 import json
 import math
-import joblib
+import sys
+from abc import ABC, abstractmethod
 from typing import List
 
 import bs4
+import joblib
 import pandas as pd
 import requests
-
-from abc import ABC, abstractmethod
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-import sys
+from webdriver_manager.chrome import ChromeDriverManager
 
 sys.path.append("..")
-from configs.constants import DATA_PATH_FULL_CSV, DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
+from configs.constants import DATA_PATH_FULL_PICKLE, DATAFRAME_INIT_COLUMNS
 from data.schema.recipe import ExtendedRecipeModel
 
 
@@ -39,7 +38,6 @@ class BBCRecipesParses(RecipeParser):
     def parse_recipes(self, url: str = URL, return_dataframe: bool = True) -> List[ExtendedRecipeModel] | pd.DataFrame:
         input_recipes = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []
         pages = math.ceil(self.EXPECTED_NUMBER_OF_RECIPIES / 30)
-        print(pages)
         for page in range(1, pages):
             current_url = url + self.PAGE_PARAM + str(page)
             print(current_url)
@@ -54,7 +52,6 @@ class BBCRecipesParses(RecipeParser):
                                                                                                            ExtendedRecipeModel] | pd.DataFrame:
         result = pd.DataFrame(columns=DATAFRAME_INIT_COLUMNS) if return_dataframe else []
         articles = self.get_all_articles(url)
-        print(len(articles))
         for article in articles:
             recipe_url = article.find('a').get('href')
             recipe_title = article.find('h2', attrs={'class': 'heading-4'}).getText()

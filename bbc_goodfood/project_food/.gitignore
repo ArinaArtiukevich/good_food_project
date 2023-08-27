@@ -2,3 +2,4 @@
 GroceryStoreDataset/
 .DS_Store
 *.DS_Store
+scratch_constants.py

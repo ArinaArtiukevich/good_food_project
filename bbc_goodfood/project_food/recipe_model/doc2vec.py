@@ -1,11 +1,9 @@
-import joblib
 import ast
-import pandas as pd
-
-from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-
 import sys
 
+import joblib
+import pandas as pd
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from pandas import DataFrame
 
 sys.path.append("..")

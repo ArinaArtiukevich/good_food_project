@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 
 import joblib
@@ -6,7 +7,6 @@ import pandas as pd
 from Levenshtein import distance
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import sys
 
 sys.path.append("..")
 from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_PARSED_COLUMN, INGREDIENTS_COLUMN, TF_IDF_MODEL, \

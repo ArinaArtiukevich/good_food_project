@@ -1,14 +1,14 @@
 import ast
+import sys
 from collections import defaultdict
+from typing import List, Dict
 
 import joblib
 import numpy as np
 import pandas as pd
-from typing import List, Dict
 from gensim.models.word2vec import Word2Vec
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import sys
 
 sys.path.append("..")
 from configs.constants import DATA_PARSED_PATH_CSV, INGREDIENTS_COLUMN, WORD2VEC_MODEL_MEAN, WORD2VEC_MODEL_TF_IDF, \

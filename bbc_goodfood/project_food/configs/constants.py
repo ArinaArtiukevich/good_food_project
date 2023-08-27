@@ -1,4 +1,3 @@
-
 DATA_PATH_FULL_CSV = r'/app/data/csv_dataframe/data_goodfood_bbc_full.csv'
 DATA_PARSED_PATH_CSV = '/app/data/csv_dataframe/data_goodfood_bbc_parsed.csv'
 
@@ -21,15 +20,13 @@ SLIDED_IMAGES_FOLDER = '/slided_images/'
 IMG_SIZE = 224
 
 AVAILABLE_INGREDIENT_NAMES = [
-                                'apple', 'banana', 'beetroot', 'bell pepper', 'cabbage',
-                                'capsicum', 'carrot', 'cauliflower', 'chilli pepper',
-                                'corn', 'cucumber', 'eggplant', 'garlic', 'ginger',
-                                'grapes', 'jalepeno', 'kiwi', 'lemon', 'lettuce',
-                                'mango', 'onion', 'orange', 'paprika', 'pear',
-                                'peas', 'pineapple', 'pomegranate', 'potato',
-                                'raddish', 'soy beans', 'spinach', 'sweetcorn',
-                                'sweetpotato', 'tomato', 'turnip', 'watermelon'
-                            ]
+    'apple', 'banana', 'beans_soy', 'beetroot', 'cabbage', 'carrot',
+    'cauliflower', 'corn', 'cucumber', 'eggplant', 'garlic', 'ginger',
+    'grapes', 'jalepeno', 'kiwi', 'lemon', 'lettuce', 'mango', 'onion',
+    'orange', 'paprika', 'pear', 'peas', 'pepper_bell', 'pepper_chilli',
+    'pineapple', 'pomegranate', 'potato', 'raddish', 'spinach', 'sweetcorn',
+    'tomato', 'turnip', 'watermelon'
+]
 
 INGREDIENTS_COLUMN = "ingredients"
 TYPES_COLUMN = "types"
